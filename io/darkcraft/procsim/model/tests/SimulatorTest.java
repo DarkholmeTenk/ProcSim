@@ -29,12 +29,54 @@ public class SimulatorTest
 
 		AbstractSimulator sim = new InOrderSimulator(mem,reg,pipe,read);
 		while(sim.step());
-		System.out.println(reg.getValue("R3"));
+		System.out.println(reg.getValue("R3", null));
 	}
+
+	/*@Test
+	public void printSuper()
+	{
+		InstructionReader read = new InstructionReader(new File("/home/mbax2sb4/workspace/ProcSim/src/test01.txt"));
+		IMemory mem = new StubMem();
+		IRegisterBank reg = new StandardBank(16);
+		AbstractPipeline pipe = new FiveStepPipeline(mem,reg, read);
+		AbstractPipeline pipeTwo = new FiveStepPipeline(mem,reg, read);
+
+		AbstractSimulator sim = new SuperScalarSimulator(mem,reg,read, pipe, pipeTwo);
+		while(sim.step());
+		String[] stateNames = pipe.getPipelineShorts();
+		ArrayList<IInstruction[][]> states = sim.getMap();
+		List<IInstruction> instructions = read.getAll();
+		for(IInstruction instruction : instructions)
+		{
+			System.out.format("%-24s| ",instruction.toString());
+			for(int i = 0; i < states.size(); i++)
+			{
+				IInstruction[][] current = states.get(i);
+				int index = -1;
+				for(int j = 0; j < current.length; j++)
+				{
+					for(int k = 0; k< current[j].length; k++)
+					{
+						if(current[j][k] == instruction)
+						{
+							index = k;
+							break;
+						}
+					}
+				}
+				if(index == -1)
+					System.out.format("%4s|", "");
+				else
+					System.out.format("%4s|", stateNames[index]);
+			}
+			System.out.println("");
+		}
+	}*/
 
 	@Test
 	public void printOutput()
 	{
+		System.out.println("Single scalar");
 		InstructionReader read = new InstructionReader(new File("/home/mbax2sb4/workspace/ProcSim/src/test01.txt"));
 		IMemory mem = new StubMem();
 		IRegisterBank reg = new StandardBank(16);
@@ -43,21 +85,24 @@ public class SimulatorTest
 		AbstractSimulator sim = new InOrderSimulator(mem,reg,pipe,read);
 		while(sim.step());
 		String[] stateNames = pipe.getPipelineShorts();
-		ArrayList<IInstruction[]> states = sim.getMap();
+		ArrayList<IInstruction[][]> states = sim.getMap();
 		List<IInstruction> instructions = read.getAll();
 		for(IInstruction instruction : instructions)
 		{
 			System.out.format("%-24s| ",instruction.toString());
 			for(int i = 0; i < states.size(); i++)
 			{
-				IInstruction[] current = states.get(i);
+				IInstruction[][] current = states.get(i);
 				int index = -1;
 				for(int j = 0; j < current.length; j++)
 				{
-					if(current[j] == instruction)
+					for(int k = 0; k< current[j].length; k++)
 					{
-						index = j;
-						break;
+						if(current[j][k] == instruction)
+						{
+							index = k;
+							break;
+						}
 					}
 				}
 				if(index == -1)

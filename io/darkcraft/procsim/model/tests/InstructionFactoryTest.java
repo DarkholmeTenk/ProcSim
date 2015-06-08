@@ -45,4 +45,11 @@ public class InstructionFactoryTest
 		assertTrue(temp.getInputRegisters()[0].equals("R2"));
 		assertTrue(temp.getInputRegisters()[1] == null);
 	}
+
+	@Test
+	public void B()
+	{
+		IInstruction temp = InstructionFactory.get("B test");
+		assertNotNull(temp);
+	}
 }

@@ -73,7 +73,7 @@ public class FiveStepPipeline extends AbstractPipeline
 			IInstruction exe = pipeline.get(2).a;
 			Conditional c = exe.getConditional();
 			if(c == null) throw new RuntimeException("C is null?");
-			Integer status = registers.getStatus();
+			Integer status = registers.getStatus(exe);
 			boolean rem = false;
 			if((!pipeline.get(2).b) && (status != null || c == Conditional.AL))
 			{
@@ -120,7 +120,7 @@ public class FiveStepPipeline extends AbstractPipeline
 					{
 						String reg = inputRegisters[i];
 						if(reg == null) continue;
-						Integer val = registers.getValue(reg);
+						Integer val = registers.getValue(reg, id);
 						if(val == null)
 						{
 							allReady = false;

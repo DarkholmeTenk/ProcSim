@@ -11,35 +11,58 @@ import java.util.ArrayList;
 public class InOrderSimulator extends AbstractSimulator
 {
 	IInstruction next = null;
-	ArrayList<IInstruction[]> stateTimeline;
+	ArrayList<IInstruction[][]> stateTimeline;
 
-	public InOrderSimulator(IMemory _mem, IRegisterBank _reg, AbstractPipeline _pipeline, InstructionReader _reader)
+	public InOrderSimulator(IMemory _mem, IRegisterBank _reg, AbstractPipeline[] _pipeline, InstructionReader _reader)
 	{
 		super(_mem, _reg, _pipeline, _reader);
 		reader.open();
-		stateTimeline = new ArrayList<IInstruction[]>();
+		stateTimeline = new ArrayList<IInstruction[][]>();
 	}
 
-	@Override
-	public boolean step()
+	public InOrderSimulator(IMemory _mem, IRegisterBank _reg, AbstractPipeline _pipeline, InstructionReader _reader)
+	{
+		super(_mem, _reg, new AbstractPipeline[]{_pipeline}, _reader);
+		reader.open();
+		stateTimeline = new ArrayList<IInstruction[][]>();
+	}
+
+	private IInstruction[][] getState()
+	{
+		return new IInstruction[][] {pipeline[0].getState()};
+	}
+
+	protected boolean stepPipelines()
+	{
+		if(!pipeline[0].isEmpty())
+		{
+			stateTimeline.add(getState());
+			pipeline[0].step();
+			return true;
+		}
+		return false;
+	}
+
+	protected void assignNext()
 	{
 		if(next == null)
 		{
-			int pcval = reg.getValue("PC");
+			int pcval = reg.getValue("PC", null);
 			if(next == null)
 				next = reader.get(pcval);
 			if(next != null)
 				reg.incrementPC();
 		}
 
-		if(next != null && pipeline.addInstruction(next))
+		if(next != null && pipeline[0].addInstruction(next))
 			next = null;
-		if(!pipeline.isEmpty())
-		{
-			stateTimeline.add(pipeline.getState());
-			pipeline.step();
-		}
-		else
+	}
+
+	@Override
+	public boolean step()
+	{
+		assignNext();
+		if(!stepPipelines())
 		{
 			reader.close();
 			return false;
@@ -48,7 +71,7 @@ public class InOrderSimulator extends AbstractSimulator
 	}
 
 	@Override
-	public ArrayList<IInstruction[]> getMap()
+	public ArrayList<IInstruction[][]> getMap()
 	{
 		return stateTimeline;
 	}

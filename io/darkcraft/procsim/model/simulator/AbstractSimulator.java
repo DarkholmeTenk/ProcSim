@@ -12,10 +12,10 @@ public abstract class AbstractSimulator
 {
 	protected final IMemory				mem;
 	protected final IRegisterBank		reg;
-	protected final AbstractPipeline	pipeline;
+	protected final AbstractPipeline[]	pipeline;
 	protected final InstructionReader	reader;
 
-	public AbstractSimulator(IMemory _mem, IRegisterBank _reg, AbstractPipeline _pipeline, InstructionReader _reader)
+	public AbstractSimulator(IMemory _mem, IRegisterBank _reg, AbstractPipeline[] _pipeline, InstructionReader _reader)
 	{
 		mem = _mem;
 		reg = _reg;
@@ -28,5 +28,5 @@ public abstract class AbstractSimulator
 	/**
 	 * @return an array list with each entry representing the state of the pipeline at that time
 	 */
-	public abstract ArrayList<IInstruction[]> getMap();
+	public abstract ArrayList<IInstruction[][]> getMap();
 }

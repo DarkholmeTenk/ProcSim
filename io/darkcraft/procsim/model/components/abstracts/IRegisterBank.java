@@ -9,7 +9,7 @@ public interface IRegisterBank
 
 	public Register get(String name);
 
-	public Integer getStatus();
+	public Integer getStatus(IInstruction inst);
 
 	public void unlockAll();
 
@@ -26,7 +26,7 @@ public interface IRegisterBank
 
 	/**Gets the current value stored in the register
 	 */
-	public Integer getValue(String name);
+	public Integer getValue(String name, IInstruction inst);
 
 	void remove(IInstruction inst);
 

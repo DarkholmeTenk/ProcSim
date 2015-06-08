@@ -62,7 +62,6 @@ public class StandardBank implements IRegisterBank
 	@Override
 	public void setAvailable(IInstruction locker, String name, int value)
 	{
-		Register r = get(name);
 		if(hasForwarding(name))
 			forwarded.put(name, value);
 	}
@@ -93,12 +92,12 @@ public class StandardBank implements IRegisterBank
 	}
 
 	@Override
-	public Integer getValue(String name)
+	public Integer getValue(String name,IInstruction inst)
 	{
 		if(forwarded.containsKey(name))
 			return forwarded.get(name);
 		Register r = get(name);
-		if(r.isLocked())
+		if(r.isLocked() && !(r.getLocker()==inst))
 			return null;
 		return r.getValue();
 	}
@@ -127,9 +126,9 @@ public class StandardBank implements IRegisterBank
 	}
 
 	@Override
-	public Integer getStatus()
+	public Integer getStatus(IInstruction inst)
 	{
-		return getValue("CPSR");
+		return getValue("CPSR",inst);
 	}
 
 	@Override
