@@ -1,7 +1,11 @@
-package io.darkcraft.procsim.model.instructions;
+package io.darkcraft.procsim.model.instruction;
+
+import io.darkcraft.procsim.model.components.abstracts.IMemory;
 
 public interface IInstruction
 {
+	public Conditional getConditional();
+
 	/**
 	 * @return an array containing the identifiers of all the registers to fetch during ID
 	 */
@@ -19,9 +23,10 @@ public interface IInstruction
 	public void doExecute();
 
 	/**
-	 * Run the memory phase of the instruction
+	 * Run the memory phase of the instruction.
+	 * Should register a request to modify the memory. Pipeline simulator should stall as long as necessary.
 	 */
-	public void doMemory();
+	public void doMemory(IMemory mem);
 
 	/**
 	 * @return the identifier of the output register, or null if no output (e.g. STR)
