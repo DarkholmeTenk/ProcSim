@@ -6,15 +6,15 @@ import io.darkcraft.procsim.model.instruction.IInstruction;
 
 public class Test extends AbstractTwoLiteralOneOutInstruction
 {
-	public static IInstruction create(Conditional c, String data)
+	public static IInstruction create(Conditional c, int id, String data)
 	{
 		String[] split = data.split(ReadingHelper.splitRegex,2);
-		return new Test(c, split[0], split[1]);
+		return new Test(c, id, split[0], split[1]);
 	}
 
-	public Test(Conditional _c, String in1, String in2)
+	public Test(Conditional _c, int id, String in1, String in2)
 	{
-		super(_c, "CPSR", in1, in2);
+		super(_c, id, "CPSR", in1, in2);
 	}
 
 	@Override
@@ -28,9 +28,9 @@ public class Test extends AbstractTwoLiteralOneOutInstruction
 	}
 
 	@Override
-	public String toString()
+	public String getName()
 	{
-		return "CMP" + c + toString(0) + toString(1);
+		return "TST";
 	}
 
 }

@@ -1,6 +1,6 @@
 package io.darkcraft.procsim.model.components.abstracts;
 
-import io.darkcraft.procsim.model.instruction.IInstruction;
+import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 
 public interface IMemory
 {
@@ -17,17 +17,28 @@ public interface IMemory
 	/**
 	 * gets the value from location
 	 */
-	public int getValue(IInstruction i, int location);
+	public int getValue(Object i, int location);
 
 	/**
 	 * sets the value in location
 	 */
-	public void setValue(IInstruction i, int location, int value);
+	public void setValue(Object i, int location, int value);
 
 	/**
 	 * gets an address from an identifier
 	 */
 	public int getLocation(String identifier);
 
-	public boolean doneOperation(IInstruction i);
+	/**
+	 * Checks whether an instruction has elapsed enough cycles for its memory request to finish
+	 * @param i the instruction to check
+	 * @return true if the memory instruction has finished
+	 * @return true if the instruction never interacted with the memory
+	 */
+	public boolean doneOperation(Object i);
+
+	/**
+	 * Increments the internal time in the memory for the purpose of making operations take time
+	 */
+	public void step(AbstractSimulator sim);
 }

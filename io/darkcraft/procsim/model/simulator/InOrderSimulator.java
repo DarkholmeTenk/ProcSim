@@ -68,6 +68,7 @@ public class InOrderSimulator extends AbstractSimulator
 	public boolean step()
 	{
 		assignNext();
+		mem.step(this);
 		if(!stepPipelines())
 		{
 			reader.close();

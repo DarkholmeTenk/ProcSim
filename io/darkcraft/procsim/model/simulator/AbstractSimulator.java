@@ -7,6 +7,7 @@ import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractSimulator
 {
@@ -25,6 +26,14 @@ public abstract class AbstractSimulator
 
 	public abstract boolean step();
 
+	public String[][] getStateNames()
+	{
+		String[][] stateNames = new String[pipeline.length][];
+		for(int i = 0; i < stateNames.length; i++)
+			stateNames[i] = pipeline[i].getPipelineShorts();
+		return stateNames;
+	}
+
 	/**
 	 * @return an array list with each entry representing the state of the pipeline at that time
 	 */
@@ -34,5 +43,14 @@ public abstract class AbstractSimulator
 	{
 		for(AbstractPipeline p : pipeline)
 			p.clearUpTo(i);
+	}
+
+	public void flushInstructionCache()
+	{
+	}
+
+	public List<IInstruction> getInstructions()
+	{
+		return reader.getAll();
 	}
 }

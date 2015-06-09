@@ -6,15 +6,15 @@ import io.darkcraft.procsim.model.instruction.IInstruction;
 
 public class Move extends AbstractOneLiteralOneOutInstruction
 {
-	public static IInstruction create(Conditional c, String data)
+	public static IInstruction create(Conditional c, int id, String data)
 	{
 		String[] split = data.split(ReadingHelper.splitRegex,2);
-		return new Move(c, split[0], split[1]);
+		return new Move(c, id, split[0], split[1]);
 	}
 
-	public Move(Conditional _c, String _out, String in1)
+	public Move(Conditional _c, int id, String _out, String in1)
 	{
-		super(_c, _out, in1);
+		super(_c, id, _out, in1);
 	}
 
 	@Override
@@ -25,9 +25,9 @@ public class Move extends AbstractOneLiteralOneOutInstruction
 	}
 
 	@Override
-	public String toString()
+	public String getName()
 	{
-		return "MOV" + super.toString();
+		return "MOV";
 	}
 
 }

@@ -84,6 +84,7 @@ public class FiveStepPipeline extends AbstractPipeline
 						int newPC = ((Branch)exe).getAddress(reader);
 						registers.setAvailable(exe, "PC", newPC);
 						sim.clearUpTo(2);
+						sim.flushInstructionCache();
 					}
 				}
 				else
@@ -227,17 +228,6 @@ public class FiveStepPipeline extends AbstractPipeline
 				registers.remove(pipeline.get(i).a);
 			pipeline.remove(i);
 		}
-		//registers.unlockAll();
-		for(int i = spot; i < stages.length; i++)
-		{
-			if(pipeline.get(i) != null)
-			{
-				IInstruction ins = pipeline.get(i).a;
-				String out = ins.getOutputRegister();
-				if(out != null)
-					registers.get(out).lock(ins);
-			}
-		}
 	}
 
 	@Override
@@ -285,7 +275,8 @@ public class FiveStepPipeline extends AbstractPipeline
 			if(!pipeline.containsKey(i)) continue;
 			if(pipeline.get(i).b) continue;
 			IInstruction inst = pipeline.get(i).a;
-			toRet.add(inst.getOutputRegister());
+			if(!pipeline.get(i).b)
+				toRet.add(inst.getOutputRegister());
 		}
 		while(toRet.contains(null))
 			toRet.remove(null);
@@ -302,8 +293,10 @@ public class FiveStepPipeline extends AbstractPipeline
 			if(!pipeline.containsKey(i)) continue;
 			if(pipeline.get(i).b) continue;
 			IInstruction inst = pipeline.get(i).a;
-			for(String s : inst.getInputRegisters())
-				toRet.add(s);
+			String[] input = inst.getInputRegisters();
+			if(input != null)
+				for(String s : input)
+					toRet.add(s);
 		}
 		while(toRet.contains(null))
 			toRet.remove(null);

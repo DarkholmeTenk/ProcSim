@@ -11,11 +11,12 @@ import java.util.List;
 
 public class SuperScalarSimulator extends InOrderSimulator
 {
-	private IInstruction secondNext;
+	private IInstruction[] nexts;
 
 	public SuperScalarSimulator(IMemory _mem, IRegisterBank _reg, InstructionReader _reader, AbstractPipeline... _pipelines)
 	{
 		super(_mem, _reg, _pipelines, _reader);
+		nexts = new IInstruction[pipeline.length];
 	}
 
 	private IInstruction[][] getState()
@@ -72,34 +73,52 @@ public class SuperScalarSimulator extends InOrderSimulator
 	}
 
 	@Override
+	public void flushInstructionCache()
+	{
+		nexts = new IInstruction[nexts.length];
+	}
+
+	@Override
 	protected void assignNext()
 	{
-		if(next == null && secondNext != null)
+		for(int i = 0; i < nexts.length - 1; i++)
 		{
-			next = secondNext;
-			secondNext = null;
-		}
-		if(next == null)
-		{
-			int pcval = reg.getValue("PC", null);
-			next = reader.get(pcval);
-			if(next != null)
-				reg.incrementPC();
+			for(int j = 1; j < (nexts.length - i); j++)
+				if(nexts[i] == null && nexts[i+j] != null)
+				{
+					nexts[i] = nexts[i+j];
+					nexts[i+j] = null;
+					break;
+				}
 		}
 
-		if(secondNext == null)
+		for(int i = 0; i < nexts.length; i++)
 		{
-			int pcval = reg.getValue("PC", null);
-			secondNext = reader.get(pcval);
-			if(secondNext != null)
-				reg.incrementPC();
+			if(nexts[i] == null)
+			{
+				int pcval = reg.getValue("PC", null);
+				nexts[i] = reader.get(pcval);
+				if(nexts[i] != null)
+					reg.incrementPC();
+				else
+					break;
+			}
 		}
 
-		boolean branch = (next instanceof Branch || secondNext instanceof Branch);
+		for(int i = 0; i< nexts.length; i++)
+		{
+			IInstruction in = nexts[i];
+			if(in instanceof Branch && i != 0)
+				break;
+			nexts[i] = assign(in);
+			if(nexts[i] != null) break;
+		}
+
+		/*boolean branch = (next instanceof Branch || secondNext instanceof Branch);
 
 		if(next != null)
 			next = assign(next);
 		if(next == null && secondNext != null && !branch)
-			secondNext = assign(secondNext);
+			secondNext = assign(secondNext);*/
 	}
 }

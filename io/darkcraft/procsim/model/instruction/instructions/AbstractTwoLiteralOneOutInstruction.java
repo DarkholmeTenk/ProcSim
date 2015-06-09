@@ -10,9 +10,9 @@ public abstract class AbstractTwoLiteralOneOutInstruction extends AbstractInstru
 	protected Integer[]			vals;
 	protected int				outVal;
 
-	public AbstractTwoLiteralOneOutInstruction(Conditional c, String _out, String in1, String in2)
+	public AbstractTwoLiteralOneOutInstruction(Conditional c, int id, String _out, String in1, String in2)
 	{
-		super(c);
+		super(c, id);
 		out = _out;
 		Integer a = ReadingHelper.literal(in1);
 		Integer b = ReadingHelper.literal(in2);
@@ -72,8 +72,8 @@ public abstract class AbstractTwoLiteralOneOutInstruction extends AbstractInstru
 		if(inR[i] != null) s += inR[i];
 		if(vals[i] != null)
 		{
-			if(inR[i] != null)
-				s+= "("+vals[i]+")";
+			if(inR[i] != null);
+			//	s+= "("+vals[i]+")";
 			else
 				s+= "#"+vals[i];
 		}
@@ -83,7 +83,7 @@ public abstract class AbstractTwoLiteralOneOutInstruction extends AbstractInstru
 	@Override
 	public String toString()
 	{
-		String soFar = c.toString();
+		String soFar = getID() + getName() + c.toString();
 		soFar += " " + out;
 		soFar += toString(0);
 		soFar += toString(1);

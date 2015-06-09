@@ -114,6 +114,7 @@ public class StandardBank implements IRegisterBank
 	@Override
 	public boolean hasForwarding(String name)
 	{
+		if(name == null) return false;
 		if(name.equals("PC") || name.equals("CPSR")) return true;
 		return false;
 	}

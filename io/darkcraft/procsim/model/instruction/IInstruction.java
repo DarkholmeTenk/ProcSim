@@ -62,4 +62,6 @@ public interface IInstruction
 	 * Should be run by the simulator when the instruction first enters the pipeline
 	 */
 	public void start();
+
+	public String getName();
 }

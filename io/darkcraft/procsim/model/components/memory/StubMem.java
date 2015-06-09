@@ -1,7 +1,7 @@
 package io.darkcraft.procsim.model.components.memory;
 
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
-import io.darkcraft.procsim.model.instruction.IInstruction;
+import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 
 public class StubMem implements IMemory
 {
@@ -19,13 +19,13 @@ public class StubMem implements IMemory
 	}
 
 	@Override
-	public int getValue(IInstruction i, int location)
+	public int getValue(Object i, int location)
 	{
 		return 0;
 	}
 
 	@Override
-	public void setValue(IInstruction i, int location, int value)
+	public void setValue(Object i, int location, int value)
 	{
 	}
 
@@ -36,9 +36,14 @@ public class StubMem implements IMemory
 	}
 
 	@Override
-	public boolean doneOperation(IInstruction i)
+	public boolean doneOperation(Object i)
 	{
 		return true;
+	}
+
+	@Override
+	public void step(AbstractSimulator sim)
+	{
 	}
 
 }

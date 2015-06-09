@@ -6,12 +6,15 @@ import io.darkcraft.procsim.model.instruction.instructions.Branch;
 import io.darkcraft.procsim.model.instruction.instructions.Compare;
 import io.darkcraft.procsim.model.instruction.instructions.Load;
 import io.darkcraft.procsim.model.instruction.instructions.Move;
+import io.darkcraft.procsim.model.instruction.instructions.Nop;
+import io.darkcraft.procsim.model.instruction.instructions.Store;
 import io.darkcraft.procsim.model.instruction.instructions.Sub;
 
 public class InstructionFactory
 {
-	public static IInstruction get(String line)
+	public static IInstruction get(String line, int id)
 	{
+		line = line.trim();
 		int comment = line.indexOf(';');
 		if(comment != -1)
 			line = line.substring(0,comment);
@@ -19,17 +22,21 @@ public class InstructionFactory
 		data[0] = data[0].toUpperCase();
 		Conditional c = Conditional.get(data[0]);
 		if(data[0].startsWith("LDR"))
-			return Load.create(c,data[1]);
+			return Load.create(c,id,data[1]);
+		if(data[0].startsWith("STR"))
+			return Store.create(c, id, data[1]);
 		if(data[0].startsWith("ADD"))
-			return Add.create(c,data[1]);
+			return Add.create(c,id,data[1]);
 		if(data[0].startsWith("SUB"))
-			return Sub.create(c,data[1]);
+			return Sub.create(c,id,data[1]);
 		if(data[0].startsWith("MOV"))
-			return Move.create(c,data[1]);
+			return Move.create(c,id,data[1]);
 		if(data[0].startsWith("CMP"))
-			return Compare.create(c,data[1]);
+			return Compare.create(c,id,data[1]);
 		if(data[0].startsWith("B"))
-			return new Branch(c,data[1]);
+			return new Branch(c,id,data[1]);
+		if(data[0].startsWith("NOP"))
+			return new Nop(c,id);
 		return null;
 	}
 }

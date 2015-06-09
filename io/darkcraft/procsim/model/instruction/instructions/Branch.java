@@ -11,16 +11,16 @@ public class Branch extends AbstractInstruction
 	private int			addr;
 	private int			offset		= 0;
 
-	public Branch(Conditional c, String address)
+	public Branch(Conditional c, int id, String address)
 	{
-		super(c);
+		super(c, id);
 		addrMnem = address;
 		register = null;
 	}
 
-	public Branch(Conditional c, String _reg, String _off)
+	public Branch(Conditional c, int id, String _reg, String _off)
 	{
-		super(c);
+		super(c, id);
 		Integer off = ReadingHelper.literal(_off);
 		if (_off == null)
 			off = 0;
@@ -72,8 +72,14 @@ public class Branch extends AbstractInstruction
 	@Override
 	public String toString()
 	{
-		return "B" + c + " " + addrMnem;
+		return getID()+"B" + c + " " + addrMnem;
 
+	}
+
+	@Override
+	public String getName()
+	{
+		return "B";
 	}
 
 }

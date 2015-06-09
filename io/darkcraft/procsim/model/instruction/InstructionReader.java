@@ -63,14 +63,14 @@ public class InstructionReader
 				line = reader.readLine();
 			if (line == null)
 				return null;
-			IInstruction inst = InstructionFactory.get(line);
+			IInstruction inst = InstructionFactory.get(line,store.size());
 			String mnem = null;
 			if (inst == null)
 			{
 				String[] data = line.split(ReadingHelper.splitRegex, 2);
 				mnem = data[0];
 				instText.add(data[1]);
-				inst = InstructionFactory.get(data[1]);
+				inst = InstructionFactory.get(data[1],store.size());
 			}
 			else
 				instText.add(line);
@@ -125,7 +125,7 @@ public class InstructionReader
 			else if (slot == store.size())
 				return null;
 		}
-		IInstruction newInst = InstructionFactory.get(instText.get(slot));
+		IInstruction newInst = InstructionFactory.get(instText.get(slot), slot);
 		fullStore.add(newInst);
 		return newInst;
 	}

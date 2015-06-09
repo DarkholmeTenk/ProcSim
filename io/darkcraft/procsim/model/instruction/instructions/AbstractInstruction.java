@@ -10,10 +10,12 @@ public abstract class AbstractInstruction implements IInstruction
 	private boolean				started		= false;
 	private boolean				executed	= false;
 	private boolean				failed		= false;
+	public final int			id;
 
-	public AbstractInstruction(Conditional _c)
+	public AbstractInstruction(Conditional _c, int _address)
 	{
 		c = _c;
+		id = _address;
 	}
 
 	@Override
@@ -62,5 +64,10 @@ public abstract class AbstractInstruction implements IInstruction
 	public boolean didFail()
 	{
 		return failed;
+	}
+
+	protected String getID()
+	{
+		return String.format("[%3d]", id);
 	}
 }

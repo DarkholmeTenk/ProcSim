@@ -6,15 +6,13 @@ import io.darkcraft.procsim.model.components.abstracts.IRegisterBank;
 import io.darkcraft.procsim.model.components.memory.StubMem;
 import io.darkcraft.procsim.model.components.pipelines.FiveStepPipeline;
 import io.darkcraft.procsim.model.components.registerbank.StandardBank;
-import io.darkcraft.procsim.model.instruction.IInstruction;
+import io.darkcraft.procsim.model.helper.OutputHelper;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 import io.darkcraft.procsim.model.simulator.InOrderSimulator;
 import io.darkcraft.procsim.model.simulator.SuperScalarSimulator;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Test;
 
@@ -36,7 +34,7 @@ public class SimulatorTest
 	@Test
 	public void printSuper()
 	{
-		System.out.println("Super scalar");
+		System.out.println("2-Way Super scalar");
 		InstructionReader read = new InstructionReader(new File("/home/mbax2sb4/workspace/ProcSim/src/test02.txt"));
 		IMemory mem = new StubMem();
 		IRegisterBank reg = new StandardBank(16);
@@ -45,34 +43,24 @@ public class SimulatorTest
 
 		AbstractSimulator sim = new SuperScalarSimulator(mem,reg,read, pipe, pipeTwo);
 		while(sim.step());
-		String[] stateNames = pipe.getPipelineShorts();
-		ArrayList<IInstruction[][]> states = sim.getMap();
-		List<IInstruction> instructions = read.getAll();
-		for(IInstruction instruction : instructions)
-		{
-			System.out.format("%-24s| ",instruction.toString());
-			for(int i = 0; i < states.size(); i++)
-			{
-				IInstruction[][] current = states.get(i);
-				int index = -1;
-				for(int j = 0; j < current.length; j++)
-				{
-					for(int k = 0; k< current[j].length; k++)
-					{
-						if(current[j][k] == instruction)
-						{
-							index = k;
-							break;
-						}
-					}
-				}
-				if(index == -1)
-					System.out.format("%4s|", "");
-				else
-					System.out.format("%4s|", stateNames[index]);
-			}
-			System.out.println("");
-		}
+		OutputHelper.output(sim.getStateNames(), sim.getMap(), read.getAll());
+	}
+
+	@Test
+	public void printSuperer()
+	{
+		System.out.println("4-Way Super scalar");
+		InstructionReader read = new InstructionReader(new File("/home/mbax2sb4/workspace/ProcSim/src/test02.txt"));
+		IMemory mem = new StubMem();
+		IRegisterBank reg = new StandardBank(16);
+		AbstractPipeline pipe = new FiveStepPipeline(mem,reg, read);
+		AbstractPipeline pipeTwo = new FiveStepPipeline(mem,reg, read);
+		AbstractPipeline pipeThr = new FiveStepPipeline(mem,reg, read);
+		AbstractPipeline pipeFor = new FiveStepPipeline(mem,reg, read);
+
+		AbstractSimulator sim = new SuperScalarSimulator(mem,reg,read, pipe, pipeTwo, pipeThr, pipeFor);
+		while(sim.step());
+		OutputHelper.output(sim.getStateNames(), sim.getMap(), read.getAll());
 	}
 
 	@Test
@@ -86,33 +74,6 @@ public class SimulatorTest
 
 		AbstractSimulator sim = new InOrderSimulator(mem,reg,pipe,read);
 		while(sim.step());
-		String[] stateNames = pipe.getPipelineShorts();
-		ArrayList<IInstruction[][]> states = sim.getMap();
-		List<IInstruction> instructions = read.getAll();
-		for(IInstruction instruction : instructions)
-		{
-			System.out.format("%-24s| ",instruction.toString());
-			for(int i = 0; i < states.size(); i++)
-			{
-				IInstruction[][] current = states.get(i);
-				int index = -1;
-				for(int j = 0; j < current.length; j++)
-				{
-					for(int k = 0; k< current[j].length; k++)
-					{
-						if(current[j][k] == instruction)
-						{
-							index = k;
-							break;
-						}
-					}
-				}
-				if(index == -1)
-					System.out.format("%4s|", "");
-				else
-					System.out.format("%4s|", stateNames[index]);
-			}
-			System.out.println("");
-		}
+		OutputHelper.output(sim.getStateNames(), sim.getMap(), read.getAll());
 	}
 }
