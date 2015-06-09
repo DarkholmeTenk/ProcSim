@@ -1,29 +1,26 @@
 package io.darkcraft.procsim.model.instruction.instructions;
 
-import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.helper.ReadingHelper;
 import io.darkcraft.procsim.model.instruction.Conditional;
-import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
 
-public class Branch implements IInstruction
+public class Branch extends AbstractInstruction
 {
-	private Conditional	c;
 	private String		addrMnem	= null;
 	private String[]	register	= null;
 	private int			addr;
 	private int			offset		= 0;
 
-	public Branch(Conditional _c, String address)
+	public Branch(Conditional c, String address)
 	{
+		super(c);
 		addrMnem = address;
-		c = _c;
 		register = null;
 	}
 
-	public Branch(Conditional _c, String _reg, String _off)
+	public Branch(Conditional c, String _reg, String _off)
 	{
-		c = _c;
+		super(c);
 		Integer off = ReadingHelper.literal(_off);
 		if (_off == null)
 			off = 0;
@@ -34,12 +31,6 @@ public class Branch implements IInstruction
 			offset = off;
 			register = new String[]{ _reg };
 		}
-	}
-
-	@Override
-	public Conditional getConditional()
-	{
-		return c;
 	}
 
 	@Override
@@ -59,22 +50,11 @@ public class Branch implements IInstruction
 		}
 	}
 
-	@Override
-	public void doExecute()
-	{
-
-	}
-
 	public int getAddress(InstructionReader reader)
 	{
 		if(addrMnem == null)
 			return addr + offset;
 		return reader.get(addrMnem) << 2;
-	}
-
-	@Override
-	public void doMemory(IMemory mem)
-	{
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package io.darkcraft.procsim.model.instruction.instructions;
 
-import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.helper.ReadingHelper;
 import io.darkcraft.procsim.model.instruction.Conditional;
 import io.darkcraft.procsim.model.instruction.IInstruction;
@@ -26,11 +25,6 @@ public class Test extends AbstractTwoLiteralOneOutInstruction
 			outVal = Conditional.zerMask;
 		else
 			outVal = 0;
-	}
-
-	@Override
-	public void doMemory(IMemory mem)
-	{
 	}
 
 	@Override

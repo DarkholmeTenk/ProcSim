@@ -37,7 +37,13 @@ public class InOrderSimulator extends AbstractSimulator
 		if(!pipeline[0].isEmpty())
 		{
 			stateTimeline.add(getState());
-			pipeline[0].step();
+			AbstractPipeline pl = pipeline[0];
+			pl.writeback(this);
+			pl.memory(this);
+			pl.execute(this);
+			pl.instructionData(this);
+			pl.instructionFetch(this);
+			pl.moveForward(this);
 			return true;
 		}
 		return false;

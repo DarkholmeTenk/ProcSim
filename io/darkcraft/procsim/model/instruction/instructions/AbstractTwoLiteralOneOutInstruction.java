@@ -2,19 +2,17 @@ package io.darkcraft.procsim.model.instruction.instructions;
 
 import io.darkcraft.procsim.model.helper.ReadingHelper;
 import io.darkcraft.procsim.model.instruction.Conditional;
-import io.darkcraft.procsim.model.instruction.IInstruction;
 
-public abstract class AbstractTwoLiteralOneOutInstruction implements IInstruction
+public abstract class AbstractTwoLiteralOneOutInstruction extends AbstractInstruction
 {
-	protected final Conditional	c;
 	protected final String[]		inR;
 	protected final String		out;
 	protected Integer[]			vals;
 	protected int				outVal;
 
-	public AbstractTwoLiteralOneOutInstruction(Conditional _c, String _out, String in1, String in2)
+	public AbstractTwoLiteralOneOutInstruction(Conditional c, String _out, String in1, String in2)
 	{
-		c = _c;
+		super(c);
 		out = _out;
 		Integer a = ReadingHelper.literal(in1);
 		Integer b = ReadingHelper.literal(in2);

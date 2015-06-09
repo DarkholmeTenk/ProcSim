@@ -21,6 +21,7 @@ public class Compare extends AbstractTwoLiteralOneOutInstruction
 	@Override
 	public void doExecute()
 	{
+		super.doExecute();
 		int x = vals[0] - vals[1];
 		if(x == 0)
 			outVal = Conditional.zerMask;

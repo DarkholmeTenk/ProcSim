@@ -2,6 +2,9 @@ package io.darkcraft.procsim.model.components.abstracts;
 
 import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
+import io.darkcraft.procsim.model.simulator.AbstractSimulator;
+
+import java.util.List;
 
 public abstract class AbstractPipeline
 {
@@ -21,11 +24,6 @@ public abstract class AbstractPipeline
 	 * @return true if the instruction was successfully added
 	 */
 	public abstract boolean addInstruction(IInstruction in);
-
-	/**
-	 * Move all the instructions along one step
-	 */
-	public abstract void step();
 
 	/**
 	 * @return an array containing the full name of all the pipeline stages
@@ -52,4 +50,16 @@ public abstract class AbstractPipeline
 	public abstract Integer getPosition(IInstruction inst);
 
 	public abstract IInstruction[] getState();
+
+	public abstract List<String> getDangerousOut();
+
+	public abstract List<String> getDangerousIn();
+
+	public abstract void moveForward(AbstractSimulator sim);
+
+	public abstract void writeback(AbstractSimulator sim);
+	public abstract void execute(AbstractSimulator sim);
+	public abstract void memory(AbstractSimulator sim);
+	public abstract void instructionData(AbstractSimulator sim);
+	public abstract void instructionFetch(AbstractSimulator sim);
 }

@@ -8,6 +8,7 @@ public class Register
 	public final String		name;
 	protected int			value;
 	protected IInstruction	locker	= null;
+	protected IInstruction 	lastLocker = null;
 
 	public Register(String _name, int initial)
 	{
@@ -32,13 +33,17 @@ public class Register
 
 	public void unlock()
 	{
+		lastLocker = locker;
 		locker = null;
 	}
 
 	public void set(IInstruction setter, int newValue)
 	{
 		if (!isLocked())
+		{
+			System.err.println(setter + " _ " + name + " - " + lastLocker);
 			throw new RegisterAccessException("Attempt to set locked register");
+		}
 		if (!locker.equals(setter))
 			throw new RegisterAccessException("Attempt to set by incorrect instruction");
 		unlock();

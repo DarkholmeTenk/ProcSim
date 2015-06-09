@@ -1,6 +1,5 @@
 package io.darkcraft.procsim.model.instruction.instructions;
 
-import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.helper.ReadingHelper;
 import io.darkcraft.procsim.model.instruction.Conditional;
 import io.darkcraft.procsim.model.instruction.IInstruction;
@@ -22,6 +21,7 @@ public class Sub extends AbstractTwoLiteralOneOutInstruction
 	@Override
 	public void doExecute()
 	{
+		super.doExecute();
 		outVal = vals[0] - vals[1];
 	}
 
@@ -30,10 +30,4 @@ public class Sub extends AbstractTwoLiteralOneOutInstruction
 	{
 		return "SUB" + super.toString();
 	}
-
-	@Override
-	public void doMemory(IMemory mem)
-	{
-	}
-
 }

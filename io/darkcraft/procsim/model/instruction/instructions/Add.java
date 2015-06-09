@@ -22,6 +22,7 @@ public class Add extends AbstractTwoLiteralOneOutInstruction
 	@Override
 	public void doExecute()
 	{
+		super.doExecute();
 		outVal = vals[0] + vals[1];
 	}
 

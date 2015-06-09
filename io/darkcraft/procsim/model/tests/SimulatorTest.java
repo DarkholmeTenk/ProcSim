@@ -10,6 +10,7 @@ import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 import io.darkcraft.procsim.model.simulator.InOrderSimulator;
+import io.darkcraft.procsim.model.simulator.SuperScalarSimulator;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,10 +33,11 @@ public class SimulatorTest
 		System.out.println(reg.getValue("R3", null));
 	}
 
-	/*@Test
+	@Test
 	public void printSuper()
 	{
-		InstructionReader read = new InstructionReader(new File("/home/mbax2sb4/workspace/ProcSim/src/test01.txt"));
+		System.out.println("Super scalar");
+		InstructionReader read = new InstructionReader(new File("/home/mbax2sb4/workspace/ProcSim/src/test02.txt"));
 		IMemory mem = new StubMem();
 		IRegisterBank reg = new StandardBank(16);
 		AbstractPipeline pipe = new FiveStepPipeline(mem,reg, read);
@@ -71,13 +73,13 @@ public class SimulatorTest
 			}
 			System.out.println("");
 		}
-	}*/
+	}
 
 	@Test
 	public void printOutput()
 	{
 		System.out.println("Single scalar");
-		InstructionReader read = new InstructionReader(new File("/home/mbax2sb4/workspace/ProcSim/src/test01.txt"));
+		InstructionReader read = new InstructionReader(new File("/home/mbax2sb4/workspace/ProcSim/src/test02.txt"));
 		IMemory mem = new StubMem();
 		IRegisterBank reg = new StandardBank(16);
 		AbstractPipeline pipe = new FiveStepPipeline(mem,reg, read);

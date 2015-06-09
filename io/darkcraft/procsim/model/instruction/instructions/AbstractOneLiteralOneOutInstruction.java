@@ -2,19 +2,17 @@ package io.darkcraft.procsim.model.instruction.instructions;
 
 import io.darkcraft.procsim.model.helper.ReadingHelper;
 import io.darkcraft.procsim.model.instruction.Conditional;
-import io.darkcraft.procsim.model.instruction.IInstruction;
 
-public abstract class AbstractOneLiteralOneOutInstruction implements IInstruction
+public abstract class AbstractOneLiteralOneOutInstruction extends AbstractInstruction
 {
-	private final Conditional	c;
 	private final String[]		inR;
 	private final String		out;
 	protected Integer[]			vals;
 	protected int				outVal;
 
-	public AbstractOneLiteralOneOutInstruction(Conditional _c, String _out, String in1)
+	public AbstractOneLiteralOneOutInstruction(Conditional c, String _out, String in1)
 	{
-		c = _c;
+		super(c);
 		out = _out;
 		Integer a = ReadingHelper.literal(in1);
 		if (a == null)
@@ -22,12 +20,6 @@ public abstract class AbstractOneLiteralOneOutInstruction implements IInstructio
 		else
 			inR = new String[] { null };
 		vals = new Integer[] { a };
-	}
-
-	@Override
-	public Conditional getConditional()
-	{
-		return c;
 	}
 
 	@Override

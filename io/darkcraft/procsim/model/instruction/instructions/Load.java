@@ -6,7 +6,7 @@ import io.darkcraft.procsim.model.helper.ReadingHelper;
 import io.darkcraft.procsim.model.instruction.Conditional;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 
-public class Load implements IInstruction
+public class Load extends AbstractInstruction
 {
 	public static IInstruction create(Conditional c, String data)
 	{
@@ -18,7 +18,6 @@ public class Load implements IInstruction
 			return new Load(c,split[0],regOff.a,regOff.b);
 	}
 
-	private final Conditional	c;
 	String						address;
 	private final String		out;
 	Integer						adr			= null;
@@ -27,9 +26,9 @@ public class Load implements IInstruction
 	String[]					register	= null;
 	int							offset;
 
-	public Load(Conditional _c, String _out)
+	public Load(Conditional c, String _out)
 	{
-		c = _c;
+		super(c);
 		out = _out;
 	}
 
@@ -76,11 +75,6 @@ public class Load implements IInstruction
 	}
 
 	@Override
-	public void doExecute()
-	{
-	}
-
-	@Override
 	public void doMemory(IMemory mem)
 	{
 		if (adr == null)
@@ -98,11 +92,5 @@ public class Load implements IInstruction
 	public int getOutputRegisterValue()
 	{
 		return val;
-	}
-
-	@Override
-	public Conditional getConditional()
-	{
-		return c;
 	}
 }

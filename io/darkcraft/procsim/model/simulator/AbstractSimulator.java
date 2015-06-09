@@ -29,4 +29,10 @@ public abstract class AbstractSimulator
 	 * @return an array list with each entry representing the state of the pipeline at that time
 	 */
 	public abstract ArrayList<IInstruction[][]> getMap();
+
+	public void clearUpTo(int i)
+	{
+		for(AbstractPipeline p : pipeline)
+			p.clearUpTo(i);
+	}
 }
