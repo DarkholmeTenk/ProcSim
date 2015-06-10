@@ -1,6 +1,7 @@
 package io.darkcraft.procsim.model.components.memory;
 
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
+import io.darkcraft.procsim.model.helper.OutputHelper;
 import io.darkcraft.procsim.model.helper.ReadingHelper;
 import io.darkcraft.procsim.model.instruction.IMemoryInstruction;
 import io.darkcraft.procsim.model.instruction.MemoryInstructionType;
@@ -14,45 +15,22 @@ import java.util.HashMap;
 
 public class StandardMemory implements IMemory
 {
-	public final static int					WORDSIZE	= 4;
-	public final static int					READTIME	= 6;
-	public final static int					WRITETIME	= 8;
+	public final static int					WORDSIZE	= 1;
+	public final static int					READTIME	= 50;
+	public final static int					WRITETIME	= 51;
 
 	private final int						size;
 	private final int[]						data;
 	private final HashMap<String, Integer>	mnemonicMap	= new HashMap<String, Integer>();
 	private int								timer		= 0;
 	private HashMap<Object,Integer>			inTimes		= new HashMap<Object,Integer>();
+	private final File						inputData;
 
-
-	public StandardMemory(int _size, File inputData)
+	public StandardMemory(int _size, File _inputData)
 	{
 		size = _size;
 		data = new int[size];
-		try
-		{
-			BufferedReader reader = new BufferedReader(new FileReader(inputData));
-			String line = null;
-			int i = 0;
-			while ((line = reader.readLine()) != null)
-			{
-				if (line.isEmpty())
-					continue;
-				String[] split = line.split(ReadingHelper.splitRegex, 2);
-				if (split.length == 2)
-				{
-					mnemonicMap.put(split[0], i);
-					data[i++] = Integer.parseInt(split[1], 16);
-				}
-				else
-					data[i++] = Integer.parseInt(split[0],16);
-			}
-			reader.close();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		inputData = _inputData;
 	}
 
 	@Override
@@ -110,6 +88,42 @@ public class StandardMemory implements IMemory
 	public void step(AbstractSimulator sim)
 	{
 		timer++;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "Main Memory (" + OutputHelper.byteString(size*getWordSize()) + ")";
+	}
+
+	@Override
+	public void read()
+	{
+		if(inputData == null || (inputData.isDirectory() || !inputData.exists())) return;
+		try
+		{
+			BufferedReader reader = new BufferedReader(new FileReader(inputData));
+			String line = null;
+			int i = 0;
+			while ((line = reader.readLine()) != null)
+			{
+				if (line.isEmpty())
+					continue;
+				String[] split = line.split(ReadingHelper.splitRegex, 2);
+				if (split.length == 2)
+				{
+					mnemonicMap.put(split[0], i);
+					data[i++] = Integer.parseInt(split[1], 16);
+				}
+				else
+					data[i++] = Integer.parseInt(split[0],16);
+			}
+			reader.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 }

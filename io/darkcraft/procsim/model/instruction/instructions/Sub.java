@@ -26,12 +26,6 @@ public class Sub extends AbstractTwoLiteralOneOutInstruction
 	}
 
 	@Override
-	public String toString()
-	{
-		return "SUB" + super.toString();
-	}
-
-	@Override
 	public String getName()
 	{
 		return "SUB";

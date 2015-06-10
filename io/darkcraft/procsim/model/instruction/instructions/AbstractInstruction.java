@@ -10,6 +10,7 @@ public abstract class AbstractInstruction implements IInstruction
 	private boolean				started		= false;
 	private boolean				executed	= false;
 	private boolean				failed		= false;
+	private boolean				leftEarly	= false;
 	public final int			id;
 
 	public AbstractInstruction(Conditional _c, int _address)
@@ -69,5 +70,15 @@ public abstract class AbstractInstruction implements IInstruction
 	protected String getID()
 	{
 		return String.format("[%3d]", id);
+	}
+
+	public void leaveEarly()
+	{
+		leftEarly = true;
+	}
+
+	public boolean didLeaveEarly()
+	{
+		return leftEarly;
 	}
 }

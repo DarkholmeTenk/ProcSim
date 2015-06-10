@@ -29,10 +29,10 @@ public class CacheEntry
 
 	private int[] split(int address)
 	{
-		int tag = address / tagBlock;
+		int tTag = address / tagBlock;
 		int offset = address % data.length;
 		return new int[]
-		{ tag, offset };
+		{ tTag, offset };
 	}
 
 	private int addressBase(int address)

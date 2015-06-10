@@ -39,7 +39,7 @@ public class Compare extends AbstractTwoLiteralOneOutInstruction
 	@Override
 	public String toString()
 	{
-		return "CMP" + c + getID()+ toString(0) + toString(1);
+		return getID() + "CMP" + c + toString(0) + toString(1);
 	}
 
 	@Override

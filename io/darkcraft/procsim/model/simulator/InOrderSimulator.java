@@ -20,6 +20,11 @@ public class InOrderSimulator extends AbstractSimulator
 		stateTimeline = new ArrayList<IInstruction[][]>();
 	}
 
+	public InOrderSimulator(IMemory _mem, IRegisterBank _reg, InstructionReader _reader, AbstractPipeline... pipes)
+	{
+		this(_mem,_reg,pipes,_reader);
+	}
+
 	public InOrderSimulator(IMemory _mem, IRegisterBank _reg, AbstractPipeline _pipeline, InstructionReader _reader)
 	{
 		super(_mem, _reg, new AbstractPipeline[]{_pipeline}, _reader);
@@ -81,6 +86,12 @@ public class InOrderSimulator extends AbstractSimulator
 	public ArrayList<IInstruction[][]> getMap()
 	{
 		return stateTimeline;
+	}
+
+	@Override
+	public int getMaxPipelines()
+	{
+		return 1;
 	}
 
 }

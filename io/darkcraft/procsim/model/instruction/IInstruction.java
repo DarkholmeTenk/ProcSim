@@ -64,4 +64,8 @@ public interface IInstruction
 	public void start();
 
 	public String getName();
+
+	public void leaveEarly();
+
+	public boolean didLeaveEarly();
 }

@@ -225,7 +225,10 @@ public class FiveStepPipeline extends AbstractPipeline
 		for(int i = 0; i < spot; i++)
 		{
 			if(pipeline.containsKey(i))
+			{
+				pipeline.get(i).a.leaveEarly();
 				registers.remove(pipeline.get(i).a);
+			}
 			pipeline.remove(i);
 		}
 	}

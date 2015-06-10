@@ -7,9 +7,8 @@ import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 
 import java.util.HashMap;
 
-public class DMCache implements IMemory
+public class DMCache extends AbstractCache
 {
-	private final IMemory					nextLevel;
 	private final int						size;
 	private final int						cacheLineSize;
 	private final CacheEntry[]				data;
@@ -18,12 +17,18 @@ public class DMCache implements IMemory
 	private int								timer		= 0;
 	private int								conflicts	= 0;
 	private int								misses		= 0;
-	public final static int					READTIME	= 1;
-	public final static int					WRITETIME	= 2;
+	public final static int					READTIMEL1	= 1;
+	public final static int					WRITETIMEL1	= 2;
+	public final static int					READTIMEL2	= 4;
+	public final static int					WRITETIMEL2	= 6;
+	public final static int					READTIMEL3	= 8;
+	public final static int					WRITETIMEL3	= 10;
+	private int						readTime;
+	private int						writeTime;
 
-	public DMCache(int _size, int _cacheLineSize, IMemory _memory)
+	public DMCache(int _size, int _cacheLineSize, IMemory _memory, int level)
 	{
-		nextLevel = _memory;
+		super(level,_memory);
 		size = _size;
 		cacheLineSize = _cacheLineSize;
 		data = new CacheEntry[size];
@@ -31,6 +36,27 @@ public class DMCache implements IMemory
 		int tagSize = (int) Math.ceil(Math.log(size) / Math.log(2));
 		for (int i = 0; i < size; i++)
 			data[i] = new CacheEntry(tagSize, cacheLineSize, memSize, this);
+	}
+
+	@Override
+	public void setLevel(int level)
+	{
+		super.setLevel(level);
+		if(level <= 1)
+		{
+			readTime = READTIMEL1;
+			writeTime = WRITETIMEL1;
+		}
+		else if(level == 2)
+		{
+			readTime = READTIMEL2;
+			writeTime = WRITETIMEL2;
+		}
+		else
+		{
+			readTime = READTIMEL3;
+			writeTime = WRITETIMEL3;
+		}
 	}
 
 	public void conflict()
@@ -46,7 +72,7 @@ public class DMCache implements IMemory
 	@Override
 	public int getSize()
 	{
-		return size * cacheLineSize;
+		return size * cacheLineSize * getWordSize();
 	}
 
 	@Override
@@ -95,11 +121,11 @@ public class DMCache implements IMemory
 		{
 			MemoryInstructionType type = ((IMemoryInstruction)i).getType();
 			if(type == MemoryInstructionType.READ)
-				return timer >= (inTime + READTIME);
+				return timer >= (inTime + readTime);
 			else
-				return timer >= (inTime + WRITETIME);
+				return timer >= (inTime + writeTime);
 		}
-		return false;
+		return timer >= (inTime + writeTime);
 	}
 
 	@Override
@@ -107,6 +133,12 @@ public class DMCache implements IMemory
 	{
 		timer++;
 		nextLevel.step(sim);
+	}
+
+	@Override
+	public String getName()
+	{
+		return "DMC";
 	}
 
 }

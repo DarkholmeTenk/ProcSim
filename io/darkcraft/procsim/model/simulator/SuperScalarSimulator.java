@@ -113,12 +113,11 @@ public class SuperScalarSimulator extends InOrderSimulator
 			nexts[i] = assign(in);
 			if(nexts[i] != null) break;
 		}
+	}
 
-		/*boolean branch = (next instanceof Branch || secondNext instanceof Branch);
-
-		if(next != null)
-			next = assign(next);
-		if(next == null && secondNext != null && !branch)
-			secondNext = assign(secondNext);*/
+	@Override
+	public int getMaxPipelines()
+	{
+		return 4;
 	}
 }

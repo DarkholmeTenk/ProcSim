@@ -10,7 +10,7 @@ public interface IMemory
 	public int getSize();
 
 	/**
-	 * @return the size of a word in bytes
+	 * @return the size of a word in ints
 	 */
 	public int getWordSize();
 
@@ -41,4 +41,6 @@ public interface IMemory
 	 * Increments the internal time in the memory for the purpose of making operations take time
 	 */
 	public void step(AbstractSimulator sim);
+
+	public void read();
 }

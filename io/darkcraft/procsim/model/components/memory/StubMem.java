@@ -46,4 +46,11 @@ public class StubMem implements IMemory
 	{
 	}
 
+	@Override
+	public void read()
+	{
+		// TODO Auto-generated method stub
+
+	}
+
 }

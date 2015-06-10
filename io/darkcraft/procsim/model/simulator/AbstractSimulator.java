@@ -19,7 +19,15 @@ public abstract class AbstractSimulator
 	public AbstractSimulator(IMemory _mem, IRegisterBank _reg, AbstractPipeline[] _pipeline, InstructionReader _reader)
 	{
 		mem = _mem;
+		mem.read();
 		reg = _reg;
+		if(_pipeline.length > getMaxPipelines())
+		{
+			AbstractPipeline[] newPipelines = new AbstractPipeline[getMaxPipelines()];
+			for(int i = 0; i < newPipelines.length; i++)
+				newPipelines[i] = _pipeline[i];
+			_pipeline = newPipelines;
+		}
 		pipeline = _pipeline;
 		reader = _reader;
 	}
@@ -53,4 +61,6 @@ public abstract class AbstractSimulator
 	{
 		return reader.getAll();
 	}
+
+	public abstract int getMaxPipelines();
 }
