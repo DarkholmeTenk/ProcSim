@@ -108,6 +108,7 @@ public class OutputHelper
 		row++;
 		for(IInstruction instruction : instructions)
 		{
+			int prevSt = -1;
 			boolean found = instruction.hasStarted();
 			if(!found)
 				continue;
@@ -152,8 +153,11 @@ public class OutputHelper
 							rd.add("#" + stateNames[pipeline][index]);
 						else if(instruction.didFail() && index >= exeIndex(stateNames[pipeline]))
 							rd.add("*" + stateNames[pipeline][index]);
+						else if(index == prevSt)
+							rd.add("@" + stateNames[pipeline][index]);
 						else
 							rd.add(stateNames[pipeline][index]);
+						prevSt = index;
 					}
 				}
 			}

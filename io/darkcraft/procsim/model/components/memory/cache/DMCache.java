@@ -17,12 +17,12 @@ public class DMCache extends AbstractCache
 	private int								timer		= 0;
 	private int								conflicts	= 0;
 	private int								misses		= 0;
-	public final static int					READTIMEL1	= 1;
-	public final static int					WRITETIMEL1	= 2;
-	public final static int					READTIMEL2	= 4;
-	public final static int					WRITETIMEL2	= 6;
-	public final static int					READTIMEL3	= 8;
-	public final static int					WRITETIMEL3	= 10;
+	public final static int					READTIMEL1	= 0;
+	public final static int					WRITETIMEL1	= 0;
+	public final static int					READTIMEL2	= 2;
+	public final static int					WRITETIMEL2	= 4;
+	public final static int					READTIMEL3	= 6;
+	public final static int					WRITETIMEL3	= 8;
 	private int						readTime;
 	private int						writeTime;
 

@@ -268,6 +268,11 @@ public class MainUI implements ActionListener
 			MemoryType type = (MemoryType) memoryTypeBox.getSelectedItem();
 			if(type.requiresNextLevel == false)
 				currentMemory = null;
+			else if(currentMemory == null)
+			{
+				JOptionPane.showMessageDialog(mainFrame,"A cache cannot be created without Main Memory","Error",JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 			currentMemory = type.getMemory(getInt(memorySizeField), getInt(cacheLineSizeField),
 					currentMemory, new File(memorySelectField.getText()));
 			currentMemField.setText(currentMemory.toString().replace(" < ", "\n"));
