@@ -45,7 +45,7 @@ public abstract class AbstractPipeline
 	 */
 	public abstract void clear();
 
-	public abstract void clearUpTo(int spot);
+	public abstract void clearAfter(int spot);
 
 	public abstract Integer getPosition(IInstruction inst);
 
@@ -55,11 +55,11 @@ public abstract class AbstractPipeline
 
 	public abstract List<String> getDangerousIn();
 
-	public abstract void moveForward(AbstractSimulator sim);
+	public abstract void moveForward(AbstractSimulator sim, int stage);
 
-	public abstract void writeback(AbstractSimulator sim);
-	public abstract void execute(AbstractSimulator sim);
-	public abstract void memory(AbstractSimulator sim);
-	public abstract void instructionData(AbstractSimulator sim);
-	public abstract void instructionFetch(AbstractSimulator sim);
+	public abstract int getInstructionTime(int stage);
+
+	public abstract IInstruction getInstruction(int stage);
+	public abstract void stepStage(AbstractSimulator sim, int stage);
+	public abstract void increaseTimer();
 }

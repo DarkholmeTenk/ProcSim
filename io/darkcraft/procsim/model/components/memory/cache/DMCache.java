@@ -5,12 +5,12 @@ import io.darkcraft.procsim.model.instruction.IMemoryInstruction;
 import io.darkcraft.procsim.model.instruction.MemoryInstructionType;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 
+import java.io.File;
 import java.util.HashMap;
 
 public class DMCache extends AbstractCache
 {
-	private final int						size;
-	private final int						cacheLineSize;
+
 	private final CacheEntry[]				data;
 	private HashMap<Object, Integer>		inTimes		= new HashMap<Object, Integer>();
 	private HashMap<Object, Integer>		inLocs		= new HashMap<Object, Integer>();
@@ -26,13 +26,11 @@ public class DMCache extends AbstractCache
 	private int						readTime;
 	private int						writeTime;
 
-	public DMCache(int _size, int _cacheLineSize, IMemory _memory, int level)
+	public DMCache(int size, int cacheLineSize, IMemory memory, int level)
 	{
-		super(level,_memory);
-		size = _size;
-		cacheLineSize = _cacheLineSize;
+		super(level,memory, size, cacheLineSize);
 		data = new CacheEntry[size];
-		int memSize = _memory.getSize();
+		int memSize = memory.getSize();
 		int tagSize = (int) Math.ceil(Math.log(size) / Math.log(2));
 		for (int i = 0; i < size; i++)
 			data[i] = new CacheEntry(tagSize, cacheLineSize, memSize, this);
@@ -141,4 +139,27 @@ public class DMCache extends AbstractCache
 		return "DMC";
 	}
 
+	@Override
+	public void setFile(File newFile)
+	{
+		nextLevel.setFile(newFile);
+	}
+
+	@Override
+	public IMemory clone()
+	{
+		IMemory next = nextLevel.clone();
+		return new DMCache(size, cacheLineSize, next, cacheLevel);
+	}
+
+	@Override
+	public IMemory cloneUp(IMemory toReplace, IMemory newOne)
+	{
+		if(nextLevel == toReplace)
+			return new DMCache(size,cacheLineSize,newOne,cacheLevel);
+		else if(nextLevel instanceof AbstractCache)
+			return new DMCache(size,cacheLineSize,((AbstractCache)nextLevel).cloneUp(toReplace,newOne),cacheLevel);
+		else
+			return new DMCache(size,cacheLineSize,nextLevel.clone(),cacheLevel);
+	}
 }

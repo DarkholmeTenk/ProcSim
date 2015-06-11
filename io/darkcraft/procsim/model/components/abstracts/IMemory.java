@@ -2,6 +2,8 @@ package io.darkcraft.procsim.model.components.abstracts;
 
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 
+import java.io.File;
+
 public interface IMemory
 {
 	/**
@@ -43,4 +45,10 @@ public interface IMemory
 	public void step(AbstractSimulator sim);
 
 	public void read();
+
+	public void setFile(File newFile);
+
+	public IMemory clone();
+
+	public IMemory[] getStack();
 }

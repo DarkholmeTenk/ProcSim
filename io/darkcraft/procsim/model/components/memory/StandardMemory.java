@@ -24,7 +24,7 @@ public class StandardMemory implements IMemory
 	private final HashMap<String, Integer>	mnemonicMap	= new HashMap<String, Integer>();
 	private int								timer		= 0;
 	private HashMap<Object,Integer>			inTimes		= new HashMap<Object,Integer>();
-	private final File						inputData;
+	private File							inputData;
 
 	public StandardMemory(int _size, File _inputData)
 	{
@@ -126,4 +126,21 @@ public class StandardMemory implements IMemory
 		}
 	}
 
+	@Override
+	public void setFile(File newFile)
+	{
+		inputData = newFile;
+	}
+
+	@Override
+	public IMemory clone()
+	{
+		return new StandardMemory(size,inputData);
+	}
+
+	@Override
+	public IMemory[] getStack()
+	{
+		return new IMemory[]{this};
+	}
 }

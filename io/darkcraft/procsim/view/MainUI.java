@@ -5,6 +5,7 @@ import io.darkcraft.procsim.controller.SimulatorType;
 import io.darkcraft.procsim.model.components.abstracts.AbstractPipeline;
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.components.abstracts.IRegisterBank;
+import io.darkcraft.procsim.model.components.memory.cache.AbstractCache;
 import io.darkcraft.procsim.model.components.pipelines.FiveStepPipeline;
 import io.darkcraft.procsim.model.components.registerbank.StandardBank;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
@@ -26,8 +27,8 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class MainUI implements ActionListener
@@ -42,11 +43,12 @@ public class MainUI implements ActionListener
 	private JTextField		memorySizeField;
 	private JTextField		cacheLineSizeField;
 	private JButton			addMemoryButton;
-	private JTextArea		currentMemField;
+	private JList		currentMemField;
 	private IMemory			currentMemory = null;
 	private JComboBox		simulatorType;
 	private JTextField		numPipelines;
 	private JButton			runButton;
+	private JButton			removeButton;
 
 	public static void main(String... args)
 	{
@@ -159,6 +161,10 @@ public class MainUI implements ActionListener
 		addMemoryButton.addActionListener(this);
 		mainFrame.add(addMemoryButton, GridBagHelper.getConstraints(0, 6, 2, 1));
 
+		removeButton = new JButton("Remove");
+		removeButton.addActionListener(this);
+		mainFrame.add(removeButton, GridBagHelper.getConstraints(0, 11, 2, 1));
+
 		runButton = new JButton("Run");
 		runButton.addActionListener(this);
 		mainFrame.add(runButton, GridBagHelper.getConstraints(2, 6, 2, 1));
@@ -180,10 +186,10 @@ public class MainUI implements ActionListener
 		cacheLineSizeField = new JTextField("4");
 		mainFrame.add(cacheLineSizeField, GridBagHelper.getConstraints(1, 5, 1, 1));
 
-		currentMemField = new JTextArea();
-		currentMemField.setEditable(false);
-		currentMemField.setPreferredSize(new Dimension(1,100));
+		currentMemField = new JList();
+		currentMemField.setPreferredSize(new Dimension(200,100));
 		currentMemField.setBackground(Color.WHITE);
+		currentMemField.setLayoutOrientation(JList.VERTICAL);
 		mainFrame.add(currentMemField, GridBagHelper.getConstraints(0, 7, 2, 4));
 
 		numPipelines = new JTextField("1");
@@ -239,6 +245,17 @@ public class MainUI implements ActionListener
 		return getInt(numPipelines);
 	}
 
+	private void updateMemoryList()
+	{
+		currentMemField.removeAll();
+		IMemory[] stack;
+		if(currentMemory != null)
+			stack = currentMemory.getStack();
+		else
+			stack = new IMemory[]{};
+		currentMemField.setListData(stack);
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
@@ -264,35 +281,69 @@ public class MainUI implements ActionListener
 			save();
 		}
 		if (source == addMemoryButton)
-		{
-			MemoryType type = (MemoryType) memoryTypeBox.getSelectedItem();
-			if(type.requiresNextLevel == false)
-				currentMemory = null;
-			else if(currentMemory == null)
-			{
-				JOptionPane.showMessageDialog(mainFrame,"A cache cannot be created without Main Memory","Error",JOptionPane.ERROR_MESSAGE);
-				return;
-			}
-			currentMemory = type.getMemory(getInt(memorySizeField), getInt(cacheLineSizeField),
-					currentMemory, new File(memorySelectField.getText()));
-			currentMemField.setText(currentMemory.toString().replace(" < ", "\n"));
-		}
+			addMemory();
 		if (source == numPipelines || source == simulatorType || source == runButton)
 			validateNumPipelines();
 		if (source == runButton)
+			run();
+		if (source == removeButton)
+			removeButtonPressed();
+	}
+
+	private void addMemory()
+	{
+		MemoryType type = (MemoryType) memoryTypeBox.getSelectedItem();
+		if(type.requiresNextLevel == false)
+			currentMemory = null;
+		else if(currentMemory == null)
 		{
-			if(currentMemory == null)
-			{
-				JOptionPane.showMessageDialog(mainFrame,"No memory has been specified","Error",JOptionPane.ERROR_MESSAGE);
-				return;
-			}
-			InstructionReader reader = new InstructionReader(new File(instructionSelectField.getText()));
-			IRegisterBank registers = new StandardBank(16);
-			AbstractPipeline[] pipes = new AbstractPipeline[validateNumPipelines()];
-			for(int i = 0; i < pipes.length; i++)
-				pipes[i] = new FiveStepPipeline(currentMemory,registers, reader);
-			AbstractSimulator s = ((SimulatorType) simulatorType.getSelectedItem()).getSimulator(currentMemory, registers, reader, pipes);
-			OutputUI ui = new OutputUI(s);
+			JOptionPane.showMessageDialog(mainFrame,"A cache cannot be created without Main Memory","Error",JOptionPane.ERROR_MESSAGE);
+			return;
 		}
+		currentMemory = type.getMemory(getInt(memorySizeField), getInt(cacheLineSizeField),
+				currentMemory, new File(memorySelectField.getText()));
+		updateMemoryList();
+	}
+
+	private void run()
+	{
+		if(currentMemory == null)
+		{
+			JOptionPane.showMessageDialog(mainFrame,"No memory has been specified","Error",JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		currentMemory = currentMemory.clone();
+		InstructionReader reader = new InstructionReader(new File(instructionSelectField.getText()));
+		IRegisterBank registers = new StandardBank(16);
+		AbstractPipeline[] pipes = new AbstractPipeline[validateNumPipelines()];
+		for(int i = 0; i < pipes.length; i++)
+			pipes[i] = new FiveStepPipeline(currentMemory,registers, reader);
+		AbstractSimulator s = ((SimulatorType) simulatorType.getSelectedItem()).getSimulator(currentMemory, registers, reader, pipes);
+		OutputUI ui = new OutputUI(s);
+	}
+
+	private void removeButtonPressed()
+	{
+		IMemory toRemove = (IMemory) currentMemField.getSelectedValue();
+		if(toRemove instanceof AbstractCache)
+		{
+			AbstractCache beingRemoved = (AbstractCache) toRemove;
+			if(beingRemoved == currentMemory)
+			{
+				currentMemory = beingRemoved.nextLevel;
+				if(currentMemory instanceof AbstractCache)
+					((AbstractCache)currentMemory).setLevel(1);
+			}
+			else if(currentMemory instanceof AbstractCache)
+			{
+				currentMemory = ((AbstractCache)currentMemory).cloneUp(beingRemoved, beingRemoved.nextLevel.clone());
+			}
+		}
+		else if(toRemove != null)
+		{
+			currentMemory = null;
+			currentMemField.setListData(new Object[]{});
+		}
+		updateMemoryList();
 	}
 }

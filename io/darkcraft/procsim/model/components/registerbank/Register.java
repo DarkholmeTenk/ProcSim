@@ -1,6 +1,5 @@
 package io.darkcraft.procsim.model.components.registerbank;
 
-import io.darkcraft.procsim.model.error.RegisterAccessException;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 
 public class Register
@@ -23,12 +22,8 @@ public class Register
 
 	public boolean lock(IInstruction _locker)
 	{
-		if (locker == null || locker.equals(_locker))
-		{
-			locker = _locker;
-			return true;
-		}
-		return false;
+		locker = _locker;
+		return true;
 	}
 
 	public void unlock()
@@ -39,15 +34,11 @@ public class Register
 
 	public void set(IInstruction setter, int newValue)
 	{
-		if (!isLocked())
+		//if((locker != null && locker.equals(setter)) || (lastLocker != null && locker == null && setter == lastLocker))
 		{
-			System.err.println(setter + " _ " + name + " - " + lastLocker);
-			throw new RegisterAccessException("Attempt to set locked register");
+			unlock();
+			value = newValue;
 		}
-		if (!locker.equals(setter))
-			throw new RegisterAccessException("Attempt to set by incorrect instruction");
-		unlock();
-		value = newValue;
 	}
 
 	public int getValue()
@@ -58,5 +49,11 @@ public class Register
 	public IInstruction getLocker()
 	{
 		return locker;
+	}
+
+	@Override
+	public String toString()
+	{
+		return name + " - " + value;
 	}
 }

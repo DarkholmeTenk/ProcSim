@@ -1,22 +1,29 @@
 package io.darkcraft.procsim.model.simulator;
 
+import io.darkcraft.procsim.controller.DependencyGraphBuilder;
 import io.darkcraft.procsim.model.components.abstracts.AbstractPipeline;
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.components.abstracts.IRegisterBank;
+import io.darkcraft.procsim.model.helper.PipelineComparator;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
 import io.darkcraft.procsim.model.instruction.instructions.Branch;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class SuperScalarSimulator extends InOrderSimulator
 {
 	private IInstruction[] nexts;
+	private Comparator<AbstractPipeline>[] comparator;
 
 	public SuperScalarSimulator(IMemory _mem, IRegisterBank _reg, InstructionReader _reader, AbstractPipeline... _pipelines)
 	{
 		super(_mem, _reg, _pipelines, _reader);
 		nexts = new IInstruction[pipeline.length];
+		comparator = new Comparator[_pipelines[0].getPipelineStages().length];
+		for(int i = 0; i < comparator.length; i++)
+			comparator[i] = new PipelineComparator(i);
 	}
 
 	private IInstruction[][] getState()
@@ -35,18 +42,24 @@ public class SuperScalarSimulator extends InOrderSimulator
 		for(AbstractPipeline pl : pipeline)
 			if(!pl.isEmpty())
 				allEmpty = false;
-		for(AbstractPipeline pl : pipeline)
-			pl.writeback(this);
-		for(AbstractPipeline pl : pipeline)
-			pl.memory(this);
-		for(AbstractPipeline pl : pipeline)
-			pl.execute(this);
-		for(AbstractPipeline pl : pipeline)
-			pl.instructionData(this);
-		for(AbstractPipeline pl : pipeline)
-			pl.instructionFetch(this);
-		for(AbstractPipeline pl : pipeline)
-			pl.moveForward(this);
+		for(int i = pipeline[0].getPipelineStages().length -1; i>= 0; i--)
+		{
+			Arrays.sort(pipeline, comparator[i]);
+			mainPipeline:
+			for(AbstractPipeline p : pipeline)
+			{
+				IInstruction mayRun = p.getInstruction(i);
+				if(mayRun == null) continue;
+				for(AbstractPipeline p2 : pipeline)
+				{
+					if(p2 == p) continue;
+					IInstruction potentialConflict = p2.getInstruction(i);
+					if(potentialConflict == null || (potentialConflict.getStartTime() >= mayRun.getStartTime())) continue;
+					if(DependencyGraphBuilder.isDependant(mayRun, potentialConflict)) continue mainPipeline;
+				}
+				p.stepStage(this, i);
+			}
+		}
 		return !allEmpty;
 	}
 
@@ -54,7 +67,7 @@ public class SuperScalarSimulator extends InOrderSimulator
 	{
 		if(i != null)
 		{
-			for(AbstractPipeline p : pipeline)
+			/*for(AbstractPipeline p : pipeline)
 			{
 				List<String> dangerous = p.getDangerousOut();
 				String[] input = i.getInputRegisters();
@@ -63,10 +76,15 @@ public class SuperScalarSimulator extends InOrderSimulator
 						if(s != null && dangerous.contains(s)) return i;
 				dangerous = p.getDangerousIn();
 				if(i.getOutputRegister() != null && dangerous.contains(i.getOutputRegister())) return i;
-			}
+			}*/
 			for(AbstractPipeline p : pipeline)
 			{
-				if(p.addInstruction(i)) return null;
+				if(p.addInstruction(i))
+				{
+					for(AbstractPipeline pl : pipeline)
+						pl.increaseTimer();
+					return null;
+				}
 			}
 		}
 		return i;
@@ -108,6 +126,7 @@ public class SuperScalarSimulator extends InOrderSimulator
 		for(int i = 0; i< nexts.length; i++)
 		{
 			IInstruction in = nexts[i];
+			if(in == null) break;
 			if(in instanceof Branch && i != 0)
 				break;
 			nexts[i] = assign(in);

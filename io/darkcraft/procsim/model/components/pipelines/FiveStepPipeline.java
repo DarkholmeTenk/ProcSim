@@ -23,6 +23,7 @@ public class FiveStepPipeline extends AbstractPipeline
 	}
 
 	public String[] stages = new String[]{"IF","ID","EX","MEM","WB"};
+	int timer = 0;
 
 	public HashMap<Integer,Pair<IInstruction,Boolean>> pipeline = new HashMap<Integer,Pair<IInstruction,Boolean>>(5);
 
@@ -32,47 +33,46 @@ public class FiveStepPipeline extends AbstractPipeline
 		if(pipeline.containsKey(0))
 			return false;
 		pipeline.put(0, new Pair<IInstruction, Boolean>(in,false));
-		in.start();
+		in.start(timer);
 		return true;
 	}
 
-	@Override
 	public void writeback(AbstractSimulator sim)
 	{
-		if(pipeline.containsKey(4))
+		if(pipeline.containsKey(4) && !pipeline.get(4).b)
 		{
 			IInstruction wb = pipeline.get(4).a;
+			pipeline.put(4, new Pair(wb,true));
 			String out = wb.getOutputRegister();
 			if(out != null && !wb.didFail())
 				registers.setProperly(wb, out, wb.getOutputRegisterValue());
 		}
+		if(pipeline.containsKey(4) && pipeline.get(4).b)
+			moveForward(sim,4);
 	}
 
-	@Override
 	public void memory(AbstractSimulator sim)
 	{
-		if(pipeline.containsKey(3))
+		if(pipeline.containsKey(3) && !pipeline.get(3).b)
 		{
 			IInstruction mem = pipeline.get(3).a;
-			if(!pipeline.get(3).b)
-			{
-				mem.doMemory(memory);
-				Pair<IInstruction,Boolean> newPair = new Pair<IInstruction, Boolean>(mem, true);
-				pipeline.put(3,newPair);
-			}
+			mem.doMemory(memory);
+			Pair<IInstruction,Boolean> newPair = new Pair<IInstruction, Boolean>(mem, true);
+			pipeline.put(3,newPair);
 		}
+		if(pipeline.containsKey(3) && pipeline.get(3).b)
+			moveForward(sim, 3);
 	}
 
-	@Override
 	public void execute(AbstractSimulator sim)
 	{
-		if(pipeline.containsKey(2))
+		if(pipeline.containsKey(2) && !pipeline.get(2).b)
 		{
 			IInstruction exe = pipeline.get(2).a;
 			Conditional c = exe.getConditional();
 			if(c == null) throw new RuntimeException("C is null?");
 			Integer status = registers.getStatus(exe);
-			if((!pipeline.get(2).b) && (status != null || c == Conditional.AL))
+			if(status != null || c == Conditional.AL)
 			{
 				if(c == Conditional.AL || c.match(status))
 				{
@@ -83,7 +83,7 @@ public class FiveStepPipeline extends AbstractPipeline
 					{
 						int newPC = ((Branch)exe).getAddress(reader);
 						registers.setAvailable(exe, "PC", newPC);
-						sim.clearUpTo(2);
+						sim.clearAfter(exe.getStartTime());
 						sim.flushInstructionCache();
 					}
 				}
@@ -95,108 +95,122 @@ public class FiveStepPipeline extends AbstractPipeline
 				Pair<IInstruction,Boolean> newPair = new Pair<IInstruction, Boolean>(exe, true);
 				pipeline.put(2,newPair);
 			}
-
-
 		}
+		if(pipeline.containsKey(2) && pipeline.get(2).b)
+			moveForward(sim, 2);
 	}
 
-	@Override
 	public void instructionData(AbstractSimulator sim)
 	{
-		if(pipeline.containsKey(1))
+		if(pipeline.containsKey(1) && !pipeline.get(1).b)
 		{
 			IInstruction id = pipeline.get(1).a;
-			if(!pipeline.get(1).b)
+			String[] inputRegisters = id.getInputRegisters();
+			int[] vals = new int[inputRegisters == null ? 0 : inputRegisters.length];
+			boolean allReady = true;
+			String o = id.getOutputRegister();
+			if(o != null)
 			{
-				String[] inputRegisters = id.getInputRegisters();
-				int[] vals = new int[inputRegisters == null ? 0 : inputRegisters.length];
-				boolean allReady = true;
-				String o = id.getOutputRegister();
-				if(o != null)
+				Register r = registers.get(o);
+				allReady = r.lock(id);
+			}
+			if(allReady)
+			{
+				if(vals.length > 0)
 				{
-					Register r = registers.get(o);
-					allReady = r.lock(id);
+					for(int i = 0; i < vals.length; i++)
+					{
+						String reg = inputRegisters[i];
+						if(reg == null) continue;
+						Integer val = registers.getValue(reg, id);
+						if(val == null)
+						{
+							allReady = false;
+							break;
+						}
+						vals[i] = val;
+					}
 				}
 				if(allReady)
 				{
-					if(vals.length > 0)
-					{
-						for(int i = 0; i < vals.length; i++)
-						{
-							String reg = inputRegisters[i];
-							if(reg == null) continue;
-							Integer val = registers.getValue(reg, id);
-							if(val == null)
-							{
-								allReady = false;
-								break;
-							}
-							vals[i] = val;
-						}
-					}
-					if(allReady)
-					{
-						id.setInputRegisters(vals);
-						pipeline.put(1,new Pair<IInstruction, Boolean>(id, true));
-					}
+					id.setInputRegisters(vals);
+					pipeline.put(1,new Pair<IInstruction, Boolean>(id, true));
 				}
 			}
 		}
+		if(pipeline.containsKey(1) && pipeline.get(1).b)
+			moveForward(sim, 1);
 	}
 
-	@Override
 	public void instructionFetch(AbstractSimulator sim)
 	{
+		if(pipeline.containsKey(0))
+			moveForward(sim, 0);
 	}
 
 	@Override
-	public void moveForward(AbstractSimulator sim)
+	public void moveForward(AbstractSimulator sim, int stage)
 	{
-		if(pipeline.containsKey(4))
+		if(stage == 4)
 		{
-			pipeline.remove(4);
+			if(pipeline.containsKey(4))
+			{
+				pipeline.remove(4);
+			}
 		}
 
-		if(pipeline.containsKey(3))
+		if(stage == 3)
 		{
-			IInstruction mem = pipeline.get(3).a;
-			if(memory.doneOperation(mem))
+			if(pipeline.containsKey(3))
 			{
-				if(!pipeline.containsKey(4))
+				IInstruction mem = pipeline.get(3).a;
+				if(memory.doneOperation(mem))
 				{
-					Pair<IInstruction,Boolean> newPair = new Pair<IInstruction, Boolean>(mem, false);
-					pipeline.put(4, newPair);
-					pipeline.remove(3);
+					if(!pipeline.containsKey(4))
+					{
+						Pair<IInstruction,Boolean> newPair = new Pair<IInstruction, Boolean>(mem, false);
+						pipeline.put(4, newPair);
+						pipeline.remove(3);
+					}
 				}
 			}
 		}
 
-		if(pipeline.containsKey(2))
+		if(stage == 2)
 		{
-			IInstruction exe = pipeline.get(2).a;
-			if(pipeline.get(2).b && (!pipeline.containsKey(3)))
+			if(pipeline.containsKey(2))
 			{
-				pipeline.put(3, new Pair<IInstruction, Boolean>(exe, false));
-				pipeline.remove(2);
+				IInstruction exe = pipeline.get(2).a;
+				if(pipeline.get(2).b && (!pipeline.containsKey(3)))
+				{
+					pipeline.put(3, new Pair<IInstruction, Boolean>(exe, false));
+					pipeline.remove(2);
+				}
 			}
 		}
 
-		if(pipeline.containsKey(1))
+		if(stage == 1)
 		{
-			IInstruction id = pipeline.get(1).a;
-			if(pipeline.get(1).b && (!pipeline.containsKey(2)))
+			if(pipeline.containsKey(1))
 			{
-				pipeline.put(2,new Pair<IInstruction, Boolean>(id, false));
-				pipeline.remove(1);
+				IInstruction id = pipeline.get(1).a;
+				if(pipeline.get(1).b && (!pipeline.containsKey(2)))
+				{
+					pipeline.put(2,new Pair<IInstruction, Boolean>(id, false));
+					pipeline.remove(1);
+				}
 			}
 		}
 
-		if(pipeline.containsKey(0))
+		if(stage == 0)
 		{
-			if(!pipeline.containsKey(1))
+			if(pipeline.containsKey(0))
 			{
-				pipeline.put(1,pipeline.get(0));
-				pipeline.remove(0);
+				if(!pipeline.containsKey(1))
+				{
+					pipeline.put(1,pipeline.get(0));
+					pipeline.remove(0);
+				}
 			}
 		}
 	}
@@ -220,16 +234,19 @@ public class FiveStepPipeline extends AbstractPipeline
 	}
 
 	@Override
-	public void clearUpTo(int spot)
+	public void clearAfter(int spot)
 	{
-		for(int i = 0; i < spot; i++)
+		for(int i = 0; i < stages.length; i++)
 		{
 			if(pipeline.containsKey(i))
 			{
-				pipeline.get(i).a.leaveEarly();
-				registers.remove(pipeline.get(i).a);
+				if(pipeline.get(i).a.getStartTime() > spot)
+				{
+					pipeline.get(i).a.leaveEarly();
+					registers.remove(pipeline.get(i).a);
+					pipeline.remove(i);
+				}
 			}
-			pipeline.remove(i);
 		}
 	}
 
@@ -304,6 +321,42 @@ public class FiveStepPipeline extends AbstractPipeline
 		while(toRet.contains(null))
 			toRet.remove(null);
 		return toRet;
+	}
+
+	@Override
+	public int getInstructionTime(int stage)
+	{
+		if(pipeline.containsKey(stage))
+			return pipeline.get(stage).a.getStartTime();
+		return -1;
+	}
+
+	@Override
+	public void increaseTimer()
+	{
+		timer++;
+	}
+
+	@Override
+	public void stepStage(AbstractSimulator sim, int stage)
+	{
+		switch(stage)
+		{
+		case 4: writeback(sim); break;
+		case 3: memory(sim); break;
+		case 2: execute(sim); break;
+		case 1: instructionData(sim); break;
+		case 0: instructionFetch(sim); break;
+		}
+	}
+
+	@Override
+	public IInstruction getInstruction(int stage)
+	{
+		Pair<IInstruction,Boolean> p = pipeline.get(stage);
+		if(p != null)
+			return p.a;
+		return null;
 	}
 
 }

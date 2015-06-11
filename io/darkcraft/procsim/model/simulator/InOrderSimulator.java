@@ -43,12 +43,9 @@ public class InOrderSimulator extends AbstractSimulator
 		{
 			stateTimeline.add(getState());
 			AbstractPipeline pl = pipeline[0];
-			pl.writeback(this);
-			pl.memory(this);
-			pl.execute(this);
-			pl.instructionData(this);
-			pl.instructionFetch(this);
-			pl.moveForward(this);
+			for(int i = pl.getPipelineStages().length - 1; i >= 0; i--)
+				pl.stepStage(this, i);
+			pl.increaseTimer();
 			return true;
 		}
 		return false;
@@ -60,9 +57,11 @@ public class InOrderSimulator extends AbstractSimulator
 		{
 			int pcval = reg.getValue("PC", null);
 			if(next == null)
+			{
 				next = reader.get(pcval);
-			if(next != null)
-				reg.incrementPC();
+				if(next != null)
+					reg.incrementPC();
+			}
 		}
 
 		if(next != null && pipeline[0].addInstruction(next))

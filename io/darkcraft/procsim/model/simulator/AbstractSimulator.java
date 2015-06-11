@@ -47,10 +47,14 @@ public abstract class AbstractSimulator
 	 */
 	public abstract ArrayList<IInstruction[][]> getMap();
 
-	public void clearUpTo(int i)
+	/**
+	 * Clears every instruction in the pipeline which comes after step i
+	 * @param i
+	 */
+	public void clearAfter(int i)
 	{
 		for(AbstractPipeline p : pipeline)
-			p.clearUpTo(i);
+			p.clearAfter(i);
 	}
 
 	public void flushInstructionCache()

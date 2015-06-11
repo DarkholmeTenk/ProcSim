@@ -3,6 +3,8 @@ package io.darkcraft.procsim.model.components.memory;
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 
+import java.io.File;
+
 public class StubMem implements IMemory
 {
 
@@ -51,6 +53,26 @@ public class StubMem implements IMemory
 	{
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void setFile(File newFile)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public IMemory clone()
+	{
+		return new StubMem();
+	}
+
+	@Override
+	public IMemory[] getStack()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

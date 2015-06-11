@@ -7,7 +7,7 @@ import io.darkcraft.procsim.model.instruction.IInstruction;
 public abstract class AbstractInstruction implements IInstruction
 {
 	public final Conditional	c;
-	private boolean				started		= false;
+	private int					startTime	= -1;
 	private boolean				executed	= false;
 	private boolean				failed		= false;
 	private boolean				leftEarly	= false;
@@ -26,15 +26,21 @@ public abstract class AbstractInstruction implements IInstruction
 	}
 
 	@Override
-	public void start()
+	public void start(int _startTime)
 	{
-		started = true;
+		startTime = _startTime;
 	}
 
 	@Override
 	public boolean hasStarted()
 	{
-		return started;
+		return startTime > -1;
+	}
+
+	@Override
+	public int getStartTime()
+	{
+		return startTime;
 	}
 
 	@Override
@@ -72,11 +78,13 @@ public abstract class AbstractInstruction implements IInstruction
 		return String.format("[%3d]", id);
 	}
 
+	@Override
 	public void leaveEarly()
 	{
 		leftEarly = true;
 	}
 
+	@Override
 	public boolean didLeaveEarly()
 	{
 		return leftEarly;
