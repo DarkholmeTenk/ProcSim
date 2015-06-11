@@ -55,8 +55,6 @@ public abstract class AbstractPipeline
 
 	public abstract List<String> getDangerousIn();
 
-	public abstract void moveForward(AbstractSimulator sim, int stage);
-
 	public abstract int getInstructionTime(int stage);
 
 	public abstract IInstruction getInstruction(int stage);

@@ -2,12 +2,14 @@ package io.darkcraft.procsim.model.components.registerbank;
 
 import io.darkcraft.procsim.model.instruction.IInstruction;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Register
 {
 	public final String		name;
 	protected int			value;
-	protected IInstruction	locker	= null;
-	protected IInstruction 	lastLocker = null;
+	protected List<IInstruction>	lockers	= new ArrayList<IInstruction>();
 
 	public Register(String _name, int initial)
 	{
@@ -17,28 +19,30 @@ public class Register
 
 	public boolean isLocked()
 	{
-		return locker != null;
+		return lockers.size() > 0;
 	}
 
 	public boolean lock(IInstruction _locker)
 	{
-		locker = _locker;
+		if(!lockers.contains(_locker))
+		lockers.add(_locker);
 		return true;
 	}
 
 	public void unlock()
 	{
-		lastLocker = locker;
-		locker = null;
+		lockers.clear();
+	}
+
+	public void unlock(IInstruction i)
+	{
+		lockers.remove(i);
 	}
 
 	public void set(IInstruction setter, int newValue)
 	{
-		//if((locker != null && locker.equals(setter)) || (lastLocker != null && locker == null && setter == lastLocker))
-		{
-			unlock();
-			value = newValue;
-		}
+		unlock(setter);
+		value = newValue;
 	}
 
 	public int getValue()
@@ -46,9 +50,9 @@ public class Register
 		return value;
 	}
 
-	public IInstruction getLocker()
+	public List<IInstruction> getLockers()
 	{
-		return locker;
+		return lockers;
 	}
 
 	@Override

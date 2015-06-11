@@ -48,7 +48,7 @@ public class FiveStepPipeline extends AbstractPipeline
 				registers.setProperly(wb, out, wb.getOutputRegisterValue());
 		}
 		if(pipeline.containsKey(4) && pipeline.get(4).b)
-			moveForward(sim,4);
+			pipeline.remove(4);
 	}
 
 	public void memory(AbstractSimulator sim)
@@ -61,7 +61,18 @@ public class FiveStepPipeline extends AbstractPipeline
 			pipeline.put(3,newPair);
 		}
 		if(pipeline.containsKey(3) && pipeline.get(3).b)
-			moveForward(sim, 3);
+		{
+			IInstruction mem = pipeline.get(3).a;
+			if(memory.doneOperation(mem))
+			{
+				if(!pipeline.containsKey(4))
+				{
+					Pair<IInstruction,Boolean> newPair = new Pair<IInstruction, Boolean>(mem, false);
+					pipeline.put(4, newPair);
+					pipeline.remove(3);
+				}
+			}
+		}
 	}
 
 	public void execute(AbstractSimulator sim)
@@ -97,7 +108,14 @@ public class FiveStepPipeline extends AbstractPipeline
 			}
 		}
 		if(pipeline.containsKey(2) && pipeline.get(2).b)
-			moveForward(sim, 2);
+		{
+			IInstruction exe = pipeline.get(2).a;
+			if(!pipeline.containsKey(3))
+			{
+				pipeline.put(3, new Pair<IInstruction, Boolean>(exe, false));
+				pipeline.remove(2);
+			}
+		}
 	}
 
 	public void instructionData(AbstractSimulator sim)
@@ -136,81 +154,31 @@ public class FiveStepPipeline extends AbstractPipeline
 					id.setInputRegisters(vals);
 					pipeline.put(1,new Pair<IInstruction, Boolean>(id, true));
 				}
+				else
+				{
+					System.err.print("");;
+				}
 			}
 		}
 		if(pipeline.containsKey(1) && pipeline.get(1).b)
-			moveForward(sim, 1);
+		{
+			IInstruction id = pipeline.get(1).a;
+			if(!pipeline.containsKey(2))
+			{
+				pipeline.put(2,new Pair<IInstruction, Boolean>(id, false));
+				pipeline.remove(1);
+			}
+		}
 	}
 
 	public void instructionFetch(AbstractSimulator sim)
 	{
 		if(pipeline.containsKey(0))
-			moveForward(sim, 0);
-	}
-
-	@Override
-	public void moveForward(AbstractSimulator sim, int stage)
-	{
-		if(stage == 4)
 		{
-			if(pipeline.containsKey(4))
+			if(!pipeline.containsKey(1))
 			{
-				pipeline.remove(4);
-			}
-		}
-
-		if(stage == 3)
-		{
-			if(pipeline.containsKey(3))
-			{
-				IInstruction mem = pipeline.get(3).a;
-				if(memory.doneOperation(mem))
-				{
-					if(!pipeline.containsKey(4))
-					{
-						Pair<IInstruction,Boolean> newPair = new Pair<IInstruction, Boolean>(mem, false);
-						pipeline.put(4, newPair);
-						pipeline.remove(3);
-					}
-				}
-			}
-		}
-
-		if(stage == 2)
-		{
-			if(pipeline.containsKey(2))
-			{
-				IInstruction exe = pipeline.get(2).a;
-				if(pipeline.get(2).b && (!pipeline.containsKey(3)))
-				{
-					pipeline.put(3, new Pair<IInstruction, Boolean>(exe, false));
-					pipeline.remove(2);
-				}
-			}
-		}
-
-		if(stage == 1)
-		{
-			if(pipeline.containsKey(1))
-			{
-				IInstruction id = pipeline.get(1).a;
-				if(pipeline.get(1).b && (!pipeline.containsKey(2)))
-				{
-					pipeline.put(2,new Pair<IInstruction, Boolean>(id, false));
-					pipeline.remove(1);
-				}
-			}
-		}
-
-		if(stage == 0)
-		{
-			if(pipeline.containsKey(0))
-			{
-				if(!pipeline.containsKey(1))
-				{
-					pipeline.put(1,pipeline.get(0));
-					pipeline.remove(0);
-				}
+				pipeline.put(1,pipeline.get(0));
+				pipeline.remove(0);
 			}
 		}
 	}
