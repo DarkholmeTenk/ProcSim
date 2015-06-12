@@ -51,7 +51,7 @@ public class OutputUI implements ActionListener
 		mainContainer = new JPanel();
 		mainContainer.setLayout(new BoxLayout(mainContainer,BoxLayout.LINE_AXIS));
 		mainFrame.setLayout(GridBagHelper.getLayout());
-		mainFrame.add(mainContainer, GridBagHelper.getConstraints(1, 1, 10, 10));
+		mainFrame.add(mainContainer, GridBagHelper.setWeights(1,GridBagHelper.getConstraints(1, 1, 10, 10)));
 		panel = new JPanel();
 		panel.setLayout(GridBagHelper.getLayout());
 		instructionPanel = new JPanel();
@@ -61,8 +61,8 @@ public class OutputUI implements ActionListener
 		layered.setLayout(GridBagHelper.getLayout());
 		layered.setLayer(surface, 1, 2);
 		layered.setLayer(panel, 0, 0);
-		layered.add(panel, GridBagHelper.getConstraints(0,0),0);
-		layered.add(surface, GridBagHelper.getConstraints(0,0),1);
+		layered.add(panel, GridBagHelper.setWeights(0,GridBagHelper.getConstraints(0,0)),0);
+		layered.add(surface, GridBagHelper.setWeights(0,GridBagHelper.getConstraints(0,0)),1);
 		pane = new JScrollPane(layered);
 		pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 		instructionPane = new JScrollPane(instructionPanel);
@@ -79,14 +79,21 @@ public class OutputUI implements ActionListener
 		instructionPane.setMinimumSize(new Dimension(instructionPane.getWidth()+5, 1));
 		mainContainer.add(pane);
 		mainFrame.pack();
+		pane.setPreferredSize(new Dimension(panel.getPreferredSize().width+5,panel.getPreferredSize().height+5));
+		pane.setMinimumSize(new Dimension(Math.min(1000, mainFrame.getWidth()), Math.min(800, mainFrame.getHeight())));
 		surface.setPreferredSize(panel.getPreferredSize());
-		if(mainFrame.getWidth() > 1000 || mainFrame.getHeight() > 800)
-		{
-			mainFrame.setSize(Math.min(1000, mainFrame.getWidth()), Math.min(800, mainFrame.getHeight()));
-		}
+		int x = (int) Math.round(pane.getPreferredSize().getWidth()) + instructionPane.getWidth() + 40;
+		int y = pane.getPreferredSize().height;
+		mainContainer.setPreferredSize(new Dimension(x,y));
 		addOtherStuff(sim);
-		panel.setMinimumSize(panel.getSize());
-		mainFrame.setMinimumSize(mainFrame.getSize());
+		mainFrame.pack();
+		if(mainFrame.getWidth() > 1250 || mainFrame.getHeight() > 1000)
+			mainFrame.setMinimumSize(new Dimension(Math.min(1000 + instructionPane.getWidth() + 20, mainFrame.getWidth()), Math.min(875, mainFrame.getHeight())));
+		else
+			mainFrame.setMinimumSize(mainFrame.getSize());
+		mainFrame.pack();
+		mainFrame.setSize(mainFrame.getMinimumSize());
+		//mainFrame.setMinimumSize(mainFrame.getSize());
 		mainFrame.setVisible(true);
 		surface.revalidate();
 	}
@@ -95,14 +102,13 @@ public class OutputUI implements ActionListener
 	{
 		toggleArrowsButton = new JButton("Toggle Arrows");
 		toggleArrowsButton.addActionListener(this);
-		mainFrame.add(toggleArrowsButton, GridBagHelper.getConstraints(8, 11, 3, 1));
+		mainFrame.add(toggleArrowsButton, GridBagHelper.getConstraints(9, 11, 2, 1));
 		stateLeftButton = new JButton("<");
 		stateLeftButton.addActionListener(this);
-		mainFrame.add(stateLeftButton, GridBagHelper.getConstraints(6, 11, 1, 1));
+		mainFrame.add(stateLeftButton, GridBagHelper.getConstraints(7, 11, 1, 1));
 		stateRightButton = new JButton(">");
 		stateRightButton.addActionListener(this);
-		mainFrame.add(stateRightButton, GridBagHelper.getConstraints(7, 11, 1, 1));
-		mainFrame.pack();
+		mainFrame.add(stateRightButton, GridBagHelper.getConstraints(8, 11, 1, 1));
 	}
 
 	private void runSim()
@@ -149,6 +155,7 @@ public class OutputUI implements ActionListener
 
 	private boolean isStalled(String str)
 	{
+		if(str == null) return false;
 		return str.startsWith("@") || str.equals("...");
 	}
 
@@ -247,11 +254,19 @@ public class OutputUI implements ActionListener
 			surface.setVisible(!surface.isVisible());
 		if(source == stateLeftButton || source == stateRightButton)
 		{
-			int toChange = (KeyboardListener.isShiftDown() ? 10 : 1) * (source == stateLeftButton ? -1 : 1);
+			panel.setVisible(false);
+			surface.setVisible(false);
+			int toChange = source == stateLeftButton ? -1 : 1;
+			if(KeyboardListener.isCtrlDown())
+				toChange *= KeyboardListener.isShiftDown() ? maxStateNum : 100;
+			else
+				toChange *= KeyboardListener.isShiftDown() ? 10 : 1;
 			stateNum = Math.min(maxStateNum, Math.max(1, stateNum + toChange));
 			panel.removeAll();
 			surface.removeAll();
 			fillResults(stateNum);
+			panel.setVisible(true);
+			surface.setVisible(true);
 			panel.revalidate();
 			layered.revalidate();
 			surface.revalidate();

@@ -13,7 +13,7 @@ public class GridBagHelper
 		GridBagConstraints c = new GridBagConstraints();
 		c.insets = defaultInsets;
 		c.anchor = GridBagConstraints.NORTHWEST;
-		c.fill = GridBagConstraints.HORIZONTAL;
+		c.fill = GridBagConstraints.BOTH;
 		return c;
 	}
 
@@ -22,6 +22,13 @@ public class GridBagHelper
 		GridBagConstraints c = getConstraints();
 		c.gridx = x;
 		c.gridy = y;
+		return c;
+	}
+
+	public static GridBagConstraints setWeights(double w, GridBagConstraints c)
+	{
+		c.weightx = w;
+		c.weighty = w;
 		return c;
 	}
 

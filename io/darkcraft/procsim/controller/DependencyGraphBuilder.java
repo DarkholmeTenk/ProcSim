@@ -4,6 +4,7 @@ import io.darkcraft.procsim.model.dependencies.IDependency;
 import io.darkcraft.procsim.model.dependencies.RAW;
 import io.darkcraft.procsim.model.dependencies.WAR;
 import io.darkcraft.procsim.model.dependencies.WAW;
+import io.darkcraft.procsim.model.helper.Pair;
 import io.darkcraft.procsim.model.instruction.Conditional;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.instructions.Branch;
@@ -15,6 +16,22 @@ import java.util.Map;
 
 public class DependencyGraphBuilder
 {
+	private static HashMap<Pair<IInstruction,IInstruction>,List<IDependency>> buildTotalMap(List<IDependency> dependencies)
+	{
+		HashMap<Pair<IInstruction,IInstruction>,List<IDependency>> total = new HashMap();
+		for(IDependency dependency : dependencies)
+		{
+			IInstruction from = dependency.getFrom();
+			IInstruction to = dependency.getTo();
+			Pair<IInstruction,IInstruction> pair = new Pair<IInstruction,IInstruction>(from,to);
+			if(!total.containsKey(pair))
+				total.put(pair, new ArrayList<IDependency>());
+			List<IDependency> list = total.get(pair);
+			list.add(dependency);
+		}
+		return total;
+	}
+
 	private static HashMap<IInstruction,List<IDependency>> buildFromMap(List<IDependency> dependencies)
 	{
 		HashMap<IInstruction,List<IDependency>> fromMap = new HashMap<IInstruction,List<IDependency>>();
@@ -42,9 +59,30 @@ public class DependencyGraphBuilder
 		return -1;
 	}
 
-	private static List<IDependency> removeTransitives(List<IDependency> dependencies)
+	private static List<IDependency> removeTransitives(List<IDependency> dependencies, List<IInstruction> insts)
 	{
-		HashMap<IInstruction,List<IDependency>> fromMap = buildFromMap(dependencies);
+		HashMap<Pair<IInstruction,IInstruction>,List<IDependency>> map = buildTotalMap(dependencies);
+		for(Pair<IInstruction,IInstruction> pair : map.keySet())
+		{
+			IInstruction from = pair.a;
+			IInstruction to = pair.b;
+			List<IDependency> list = map.get(pair);
+			for(IInstruction i : insts)
+			{
+				if(i.equals(from) || i.equals(to)) continue;
+				Pair<IInstruction,IInstruction> pairTwo = new Pair(to,i);
+				if(!map.containsKey(pairTwo)) continue;
+				Pair<IInstruction,IInstruction> pairThree = new Pair(from,i);
+				if(!map.containsKey(pairThree)) continue;
+				List<IDependency> depListOne = map.get(pairTwo);
+				List<IDependency> depListTwo = map.get(pairThree);
+				for(IDependency a : depListOne)
+					for(IDependency b : depListTwo)
+						if(a.getType().equals(b.getType()))
+							dependencies.remove(b);
+			}
+		}
+		/*
 		for(IInstruction inst : fromMap.keySet())
 		{
 			List<IDependency> deps = fromMap.get(inst);
@@ -59,7 +97,7 @@ public class DependencyGraphBuilder
 						dependencies.remove(b);
 				}
 			}
-		}
+		}*/
 		return dependencies;
 	}
 
@@ -116,7 +154,7 @@ public class DependencyGraphBuilder
 	public static List<IDependency> getGraph(List<IInstruction> instructions)
 	{
 		List<IDependency> dependencies = getAllConnections(instructions);
-		dependencies = removeTransitives(dependencies);
+		dependencies = removeTransitives(dependencies, instructions);
 
 		return dependencies;
 	}
