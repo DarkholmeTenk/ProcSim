@@ -97,7 +97,7 @@ public class StandardBank implements IRegisterBank
 		if(forwarded.containsKey(name))
 			return forwarded.get(name);
 		Register r = get(name);
-		if(r.isLocked() && !(r.getLockers().contains(inst)))
+		if(r.isLocked() && !(r.getLockers().size()== 1 && r.getLockers().contains(inst)))
 			return null;
 		return r.getValue();
 	}

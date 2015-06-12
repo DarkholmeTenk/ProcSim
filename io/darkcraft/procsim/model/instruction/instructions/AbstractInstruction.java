@@ -8,6 +8,7 @@ public abstract class AbstractInstruction implements IInstruction
 {
 	public final Conditional	c;
 	private int					startTime	= -1;
+	private int					finishTime	= -1;
 	private boolean				executed	= false;
 	private boolean				failed		= false;
 	private boolean				leftEarly	= false;
@@ -88,5 +89,17 @@ public abstract class AbstractInstruction implements IInstruction
 	public boolean didLeaveEarly()
 	{
 		return leftEarly;
+	}
+
+	@Override
+	public void finish(int time)
+	{
+		finishTime = time;
+	}
+
+	@Override
+	public int getFinishTime()
+	{
+		return finishTime;
 	}
 }

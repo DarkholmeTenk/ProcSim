@@ -70,4 +70,8 @@ public interface IInstruction
 	public void leaveEarly();
 
 	public boolean didLeaveEarly();
+
+	public void finish(int time);
+
+	public int getFinishTime();
 }

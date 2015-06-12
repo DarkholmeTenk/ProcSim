@@ -8,6 +8,7 @@ import io.darkcraft.procsim.model.components.abstracts.AbstractPipeline;
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.components.abstracts.IRegisterBank;
 import io.darkcraft.procsim.model.components.memory.cache.AbstractCache;
+import io.darkcraft.procsim.model.helper.KeyboardListener;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 
@@ -116,6 +117,7 @@ public class MainUI implements ActionListener
 
 	public MainUI()
 	{
+		KeyboardListener.isShiftDown();
 		mainFrame = new JFrame();
 		mainFrame.setLayout(GridBagHelper.getLayout());
 		mainFrame.setTitle("ProcSim");
@@ -128,6 +130,7 @@ public class MainUI implements ActionListener
 		mainFrame.setVisible(true);
 		mainFrame.pack();
 		mainFrame.setMinimumSize(new Dimension(mainFrame.getWidth(), mainFrame.getHeight()));
+		mainFrame.pack();
 		load();
 	}
 

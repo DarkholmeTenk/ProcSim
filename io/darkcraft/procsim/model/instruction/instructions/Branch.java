@@ -7,7 +7,7 @@ import io.darkcraft.procsim.model.instruction.InstructionReader;
 public class Branch extends AbstractInstruction
 {
 	private String		addrMnem	= null;
-	private String[]	register	= null;
+	protected String[]	register	= null;
 	private int			addr;
 	private int			offset		= 0;
 

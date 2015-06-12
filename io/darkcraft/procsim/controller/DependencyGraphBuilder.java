@@ -11,6 +11,7 @@ import io.darkcraft.procsim.model.instruction.instructions.Branch;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DependencyGraphBuilder
 {
@@ -148,5 +149,25 @@ public class DependencyGraphBuilder
 		}
 		if(second instanceof Branch) return true;
 		return false;
+	}
+
+	private static Map<IInstruction,List<IDependency>> getDirDependencies(List<IInstruction>insts, boolean to)
+	{
+		Map<IInstruction,List<IDependency>> map = new HashMap<IInstruction,List<IDependency>>();
+		List<IDependency> dependencies = getGraph(insts);
+		for(IDependency d : dependencies)
+		{
+			IInstruction k = to ? d.getTo() : d.getFrom();
+			if(!map.containsKey(k))
+				map.put(k, new ArrayList<IDependency>());
+			List<IDependency> deps = map.get(k);
+			deps.add(d);
+		}
+		return map;
+	}
+
+	public static Map<IInstruction,List<IDependency>> getToDependencies(List<IInstruction> insts)
+	{
+		return getDirDependencies(insts,true);
 	}
 }

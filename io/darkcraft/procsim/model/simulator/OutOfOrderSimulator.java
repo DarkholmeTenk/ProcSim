@@ -8,24 +8,24 @@ import io.darkcraft.procsim.model.instruction.InstructionReader;
 
 import java.util.ArrayList;
 
-public class InOrderSimulator extends AbstractSimulator
+public class OutOfOrderSimulator extends AbstractSimulator
 {
 	IInstruction next = null;
 	ArrayList<IInstruction[][]> stateTimeline;
 
-	public InOrderSimulator(IMemory _mem, IRegisterBank _reg, AbstractPipeline[] _pipeline, InstructionReader _reader)
+	public OutOfOrderSimulator(IMemory _mem, IRegisterBank _reg, AbstractPipeline[] _pipeline, InstructionReader _reader)
 	{
 		super(_mem, _reg, _pipeline, _reader);
 		reader.open();
 		stateTimeline = new ArrayList<IInstruction[][]>();
 	}
 
-	public InOrderSimulator(IMemory _mem, IRegisterBank _reg, InstructionReader _reader, AbstractPipeline... pipes)
+	public OutOfOrderSimulator(IMemory _mem, IRegisterBank _reg, InstructionReader _reader, AbstractPipeline... pipes)
 	{
 		this(_mem,_reg,pipes,_reader);
 	}
 
-	public InOrderSimulator(IMemory _mem, IRegisterBank _reg, AbstractPipeline _pipeline, InstructionReader _reader)
+	public OutOfOrderSimulator(IMemory _mem, IRegisterBank _reg, AbstractPipeline _pipeline, InstructionReader _reader)
 	{
 		super(_mem, _reg, new AbstractPipeline[]{_pipeline}, _reader);
 		reader.open();
@@ -96,7 +96,7 @@ public class InOrderSimulator extends AbstractSimulator
 	@Override
 	public int getFinalStateNum()
 	{
-		return stateTimeline.size();
+		return stateTimeline.size()-1;
 	}
 
 }

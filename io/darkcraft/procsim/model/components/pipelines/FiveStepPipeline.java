@@ -42,6 +42,7 @@ public class FiveStepPipeline extends AbstractPipeline
 		if(pipeline.containsKey(4) && !pipeline.get(4).b)
 		{
 			IInstruction wb = pipeline.get(4).a;
+			wb.finish(timer);
 			pipeline.put(4, new Pair(wb,true));
 			String out = wb.getOutputRegister();
 			if(out != null && !wb.didFail())

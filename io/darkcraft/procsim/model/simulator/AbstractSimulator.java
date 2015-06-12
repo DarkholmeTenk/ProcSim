@@ -7,6 +7,7 @@ import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public abstract class AbstractSimulator
@@ -63,8 +64,18 @@ public abstract class AbstractSimulator
 
 	public List<IInstruction> getInstructions()
 	{
+		List<IInstruction> insts = new ArrayList(reader.getAll());
+		Iterator<IInstruction> iter = insts.iterator();
+		while(iter.hasNext())
+		{
+			IInstruction i = iter.next();
+			if(!i.hasStarted())
+				iter.remove();
+		}
 		return reader.getAll();
 	}
 
 	public abstract int getMaxPipelines();
+
+	public abstract int getFinalStateNum();
 }
