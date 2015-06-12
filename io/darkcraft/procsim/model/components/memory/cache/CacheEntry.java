@@ -7,7 +7,6 @@ public class CacheEntry
 	private int[]			data	= null;
 	private int				tag		= -1;
 	private final int		tagSize;
-	private final int		memSize;
 	private final int		tagBlock;
 	private final DMCache	owner;
 
@@ -17,7 +16,6 @@ public class CacheEntry
 		data = new int[cacheLineSize];
 		for (int i = 0; i < data.length; i++)
 			data[i] = 0;
-		memSize = _memSize;
 		tagBlock = (int) Math.floor(Math.pow(2, tagSize));
 		owner = _owner;
 	}

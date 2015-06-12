@@ -48,7 +48,6 @@ public abstract class AbstractCache implements IMemory
 			stackSize++;
 		}
 		IMemory[] stack = new IMemory[stackSize];
-		int i = stackSize;
 		stack[--stackSize] = this;
 		next = nextLevel;
 		while(next instanceof AbstractCache)

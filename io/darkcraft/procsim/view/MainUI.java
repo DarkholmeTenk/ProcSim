@@ -1,13 +1,13 @@
 package io.darkcraft.procsim.view;
 
 import io.darkcraft.procsim.controller.MemoryType;
+import io.darkcraft.procsim.controller.PipelineType;
+import io.darkcraft.procsim.controller.RegisterType;
 import io.darkcraft.procsim.controller.SimulatorType;
 import io.darkcraft.procsim.model.components.abstracts.AbstractPipeline;
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.components.abstracts.IRegisterBank;
 import io.darkcraft.procsim.model.components.memory.cache.AbstractCache;
-import io.darkcraft.procsim.model.components.pipelines.FiveStepPipeline;
-import io.darkcraft.procsim.model.components.registerbank.StandardBank;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 
@@ -43,12 +43,14 @@ public class MainUI implements ActionListener
 	private JTextField		memorySizeField;
 	private JTextField		cacheLineSizeField;
 	private JButton			addMemoryButton;
-	private JList		currentMemField;
-	private IMemory			currentMemory = null;
-	private JComboBox		simulatorType;
+	private JList			currentMemField;
+	private IMemory			currentMemory	= null;
+	private JComboBox		simulatorTypeBox;
 	private JTextField		numPipelines;
 	private JButton			runButton;
 	private JButton			removeButton;
+	private JComboBox		pipelineTypeBox;
+	private JComboBox		registerTypeBox;
 
 	public static void main(String... args)
 	{
@@ -125,7 +127,7 @@ public class MainUI implements ActionListener
 		mainFrame.setSize(800, 600);
 		mainFrame.setVisible(true);
 		mainFrame.pack();
-		mainFrame.setMinimumSize(new Dimension(mainFrame.getWidth(),mainFrame.getHeight()));
+		mainFrame.setMinimumSize(new Dimension(mainFrame.getWidth(), mainFrame.getHeight()));
 		load();
 	}
 
@@ -137,12 +139,24 @@ public class MainUI implements ActionListener
 			memoryTypeBox.addItem(type);
 		mainFrame.add(memoryTypeBox, GridBagHelper.getConstraints(0, 3, 2, 1));
 
-		simulatorType = new JComboBox();
-		simulatorType.setBackground(Color.WHITE);
-		simulatorType.addActionListener(this);
-		for(SimulatorType s : SimulatorType.values())
-			simulatorType.addItem(s);
-		mainFrame.add(simulatorType, GridBagHelper.getConstraints(2,3,2,1));
+		simulatorTypeBox = new JComboBox();
+		simulatorTypeBox.setBackground(Color.WHITE);
+		simulatorTypeBox.addActionListener(this);
+		for (SimulatorType s : SimulatorType.values())
+			simulatorTypeBox.addItem(s);
+		mainFrame.add(simulatorTypeBox, GridBagHelper.getConstraints(2, 3, 2, 1));
+
+		pipelineTypeBox = new JComboBox();
+		pipelineTypeBox.setBackground(Color.WHITE);
+		for (PipelineType s : PipelineType.values())
+			pipelineTypeBox.addItem(s);
+		mainFrame.add(pipelineTypeBox, GridBagHelper.getConstraints(4, 3, 2, 1));
+
+		registerTypeBox = new JComboBox();
+		registerTypeBox.setBackground(Color.WHITE);
+		for (RegisterType s : RegisterType.values())
+			registerTypeBox.addItem(s);
+		mainFrame.add(registerTypeBox, GridBagHelper.getConstraints(6, 3, 2, 1));
 	}
 
 	private void registerButtons()
@@ -150,12 +164,12 @@ public class MainUI implements ActionListener
 		instructionSelectButton = new JButton("Browse");
 		instructionSelectButton.addActionListener(this);
 		instructionSelectButton.setPreferredSize(new Dimension(100, 20));
-		mainFrame.add(instructionSelectButton, GridBagHelper.getConstraints(7, 0));
+		mainFrame.add(instructionSelectButton, GridBagHelper.getConstraints(9, 0));
 
 		memorySelectButton = new JButton("Browse");
 		memorySelectButton.addActionListener(this);
 		memorySelectButton.setPreferredSize(new Dimension(100, 20));
-		mainFrame.add(memorySelectButton, GridBagHelper.getConstraints(7, 1));
+		mainFrame.add(memorySelectButton, GridBagHelper.getConstraints(9, 1));
 
 		addMemoryButton = new JButton("Add");
 		addMemoryButton.addActionListener(this);
@@ -174,11 +188,11 @@ public class MainUI implements ActionListener
 	{
 		instructionSelectField = new JTextField();
 		instructionSelectField.setPreferredSize(new Dimension(580, 20));
-		mainFrame.add(instructionSelectField, GridBagHelper.getConstraints(3, 0, 4, 1));
+		mainFrame.add(instructionSelectField, GridBagHelper.getConstraints(3, 0, 6, 1));
 
 		memorySelectField = new JTextField();
 		memorySelectField.setPreferredSize(new Dimension(580, 20));
-		mainFrame.add(memorySelectField, GridBagHelper.getConstraints(3, 1, 4, 1));
+		mainFrame.add(memorySelectField, GridBagHelper.getConstraints(3, 1, 6, 1));
 
 		memorySizeField = new JTextField("1024");
 		mainFrame.add(memorySizeField, GridBagHelper.getConstraints(1, 4, 1, 1));
@@ -187,7 +201,7 @@ public class MainUI implements ActionListener
 		mainFrame.add(cacheLineSizeField, GridBagHelper.getConstraints(1, 5, 1, 1));
 
 		currentMemField = new JList();
-		currentMemField.setPreferredSize(new Dimension(200,100));
+		currentMemField.setPreferredSize(new Dimension(200, 100));
 		currentMemField.setBackground(Color.WHITE);
 		currentMemField.setLayoutOrientation(JList.VERTICAL);
 		mainFrame.add(currentMemField, GridBagHelper.getConstraints(0, 7, 2, 4));
@@ -218,6 +232,12 @@ public class MainUI implements ActionListener
 
 		JLabel numPipelinesLabel = new JLabel("Num Pipelines:");
 		mainFrame.add(numPipelinesLabel, GridBagHelper.getConstraints(2, 4, 1, 1));
+
+		JLabel pipelineTypeLabel = new JLabel("Pipeline Type");
+		mainFrame.add(pipelineTypeLabel, GridBagHelper.getConstraints(4, 2, 2, 1, GridBagConstraints.CENTER));
+
+		JLabel registerTypeLabel = new JLabel("Registers Type");
+		mainFrame.add(registerTypeLabel, GridBagHelper.getConstraints(6, 2, 2, 1, GridBagConstraints.CENTER));
 	}
 
 	private int getInt(JTextField field)
@@ -227,7 +247,7 @@ public class MainUI implements ActionListener
 		{
 			return Integer.parseInt(s);
 		}
-		catch(NumberFormatException e)
+		catch (NumberFormatException e)
 		{
 			return 0;
 		}
@@ -235,13 +255,13 @@ public class MainUI implements ActionListener
 
 	private int validateNumPipelines()
 	{
-		SimulatorType s = (SimulatorType) simulatorType.getSelectedItem();
+		SimulatorType s = (SimulatorType) simulatorTypeBox.getSelectedItem();
 		int max = s.maxPipelines;
 		int cur = getInt(numPipelines);
-		if(cur > max)
-			numPipelines.setText(""+max);
-		else if(cur < 1)
-			numPipelines.setText(""+1);
+		if (cur > max)
+			numPipelines.setText("" + max);
+		else if (cur < 1)
+			numPipelines.setText("" + 1);
 		return getInt(numPipelines);
 	}
 
@@ -249,10 +269,10 @@ public class MainUI implements ActionListener
 	{
 		currentMemField.removeAll();
 		IMemory[] stack;
-		if(currentMemory != null)
+		if (currentMemory != null)
 			stack = currentMemory.getStack();
 		else
-			stack = new IMemory[]{};
+			stack = new IMemory[] {};
 		currentMemField.setListData(stack);
 	}
 
@@ -263,7 +283,7 @@ public class MainUI implements ActionListener
 		if (source == instructionSelectButton)
 		{
 			JFileChooser fileChooser = new JFileChooser();
-			if(instructionSelectField.getText() != null)
+			if (instructionSelectField.getText() != null)
 				fileChooser.setCurrentDirectory(new File(instructionSelectField.getText()));
 			int returnValue = fileChooser.showOpenDialog(instructionSelectButton);
 			if (returnValue == JFileChooser.APPROVE_OPTION)
@@ -273,7 +293,7 @@ public class MainUI implements ActionListener
 		if (source == memorySelectButton)
 		{
 			JFileChooser fileChooser = new JFileChooser();
-			if(memorySelectField.getText() != null)
+			if (memorySelectField.getText() != null)
 				fileChooser.setCurrentDirectory(new File(memorySelectField.getText()));
 			int returnValue = fileChooser.showOpenDialog(memorySelectButton);
 			if (returnValue == JFileChooser.APPROVE_OPTION)
@@ -282,7 +302,7 @@ public class MainUI implements ActionListener
 		}
 		if (source == addMemoryButton)
 			addMemory();
-		if (source == numPipelines || source == simulatorType || source == runButton)
+		if (source == numPipelines || source == simulatorTypeBox || source == runButton)
 			validateNumPipelines();
 		if (source == runButton)
 			run();
@@ -293,56 +313,57 @@ public class MainUI implements ActionListener
 	private void addMemory()
 	{
 		MemoryType type = (MemoryType) memoryTypeBox.getSelectedItem();
-		if(type.requiresNextLevel == false)
+		if (type.requiresNextLevel == false)
 			currentMemory = null;
-		else if(currentMemory == null)
+		else if (currentMemory == null)
 		{
-			JOptionPane.showMessageDialog(mainFrame,"A cache cannot be created without Main Memory","Error",JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(mainFrame, "A cache cannot be created without Main Memory", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		currentMemory = type.getMemory(getInt(memorySizeField), getInt(cacheLineSizeField),
-				currentMemory, new File(memorySelectField.getText()));
+		currentMemory = type.getMemory(getInt(memorySizeField), getInt(cacheLineSizeField), currentMemory, new File(memorySelectField.getText()));
 		updateMemoryList();
 	}
 
 	private void run()
 	{
-		if(currentMemory == null)
+		if (currentMemory == null)
 		{
-			JOptionPane.showMessageDialog(mainFrame,"No memory has been specified","Error",JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(mainFrame, "No memory has been specified", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		currentMemory = currentMemory.clone();
+		RegisterType regType = (RegisterType) registerTypeBox.getSelectedItem();
+		PipelineType pipType = (PipelineType) pipelineTypeBox.getSelectedItem();
 		InstructionReader reader = new InstructionReader(new File(instructionSelectField.getText()));
-		IRegisterBank registers = new StandardBank(16);
+		IRegisterBank registers = regType.construct();
 		AbstractPipeline[] pipes = new AbstractPipeline[validateNumPipelines()];
-		for(int i = 0; i < pipes.length; i++)
-			pipes[i] = new FiveStepPipeline(currentMemory,registers, reader);
-		AbstractSimulator s = ((SimulatorType) simulatorType.getSelectedItem()).getSimulator(currentMemory, registers, reader, pipes);
-		OutputUI ui = new OutputUI(s);
+		for (int i = 0; i < pipes.length; i++)
+			pipes[i] = pipType.construct(currentMemory, registers, reader);
+		AbstractSimulator s = ((SimulatorType) simulatorTypeBox.getSelectedItem()).getSimulator(currentMemory, registers, reader, pipes);
+		new OutputUI(s);
 	}
 
 	private void removeButtonPressed()
 	{
 		IMemory toRemove = (IMemory) currentMemField.getSelectedValue();
-		if(toRemove instanceof AbstractCache)
+		if (toRemove instanceof AbstractCache)
 		{
 			AbstractCache beingRemoved = (AbstractCache) toRemove;
-			if(beingRemoved == currentMemory)
+			if (beingRemoved == currentMemory)
 			{
 				currentMemory = beingRemoved.nextLevel;
-				if(currentMemory instanceof AbstractCache)
-					((AbstractCache)currentMemory).setLevel(1);
+				if (currentMemory instanceof AbstractCache)
+					((AbstractCache) currentMemory).setLevel(1);
 			}
-			else if(currentMemory instanceof AbstractCache)
+			else if (currentMemory instanceof AbstractCache)
 			{
-				currentMemory = ((AbstractCache)currentMemory).cloneUp(beingRemoved, beingRemoved.nextLevel.clone());
+				currentMemory = ((AbstractCache) currentMemory).cloneUp(beingRemoved, beingRemoved.nextLevel.clone());
 			}
 		}
-		else if(toRemove != null)
+		else if (toRemove != null)
 		{
 			currentMemory = null;
-			currentMemField.setListData(new Object[]{});
+			currentMemField.setListData(new Object[] {});
 		}
 		updateMemoryList();
 	}

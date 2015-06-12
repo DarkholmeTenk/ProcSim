@@ -88,9 +88,8 @@ public class OutputHelper
 				disabledStates.add(i);
 		}
 
-		int count = 0;
 		boolean printedMissing = false;
-		for(Object o : states)
+		for(int count = 0; count < states.size(); count++)
 		{
 			if(!disabledStates.contains(count))
 			{
@@ -103,16 +102,14 @@ public class OutputHelper
 					data.get(0).add("...");
 				printedMissing = true;
 			}
-			count++;
 		}
 		row++;
 		for(IInstruction instruction : instructions)
 		{
-			int prevSt = -1;
-			boolean found = instruction.hasStarted();
-			if(!found)
+			int prevIndex = -1;
+			if(!instruction.hasStarted())
 				continue;
-			boolean d = false;
+			boolean hasPrintedDisabled = false;
 			List<String> rd = data.get(row);
 			rd.add(instruction.toString());
 			for(int i = 0; i < states.size(); i++)
@@ -134,30 +131,30 @@ public class OutputHelper
 					}
 				}
 				boolean disabled = disabledStates.contains(i);
-				if(disabled && !d)
+				if(disabled && !hasPrintedDisabled)
 				{
-					d = true;
+					hasPrintedDisabled = true;
 					if(index == -1)
-						rd.add("");
+						rd.add(null);
 					else
 						rd.add("...");
 				}
 				else if(!disabled)
 				{
-					d = false;
+					hasPrintedDisabled = false;
 					if(index == -1)
-						rd.add("");
+						rd.add(null);
 					else
 					{
 						if(instruction.didLeaveEarly())
 							rd.add("#" + stateNames[pipeline][index]);
 						else if(instruction.didFail() && index >= exeIndex(stateNames[pipeline]))
 							rd.add("*" + stateNames[pipeline][index]);
-						else if(index == prevSt)
+						else if(index == prevIndex)
 							rd.add("@" + stateNames[pipeline][index]);
 						else
 							rd.add(stateNames[pipeline][index]);
-						prevSt = index;
+						prevIndex = index;
 					}
 				}
 			}

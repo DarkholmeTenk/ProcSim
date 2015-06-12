@@ -103,7 +103,7 @@ public class OutputUI
 			for(int j = 0; j < row.size(); j++)
 			{
 				String str = row.get(j);
-				if(str.isEmpty()) continue;
+				if(str == null || str.isEmpty()) continue;
 				addText(str,i,j);
 			}
 		}

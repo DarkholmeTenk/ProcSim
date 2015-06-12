@@ -1,6 +1,5 @@
 package io.darkcraft.procsim.model.tests;
 
-import static org.junit.Assert.assertTrue;
 import io.darkcraft.procsim.model.components.abstracts.AbstractPipeline;
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.components.abstracts.IRegisterBank;
@@ -31,8 +30,6 @@ public class MemoryTest
 		AbstractSimulator sim = new InOrderSimulator(memory,registers,reader, pipeline,pipelineTwo);
 		while(sim.step());
 		int location = memory.getLocation("memoryOut");
-		int value = memory.getValue(null, location);
-		assertTrue(value == 798);
 		OutputHelper.output(sim);
 	}
 
@@ -47,7 +44,6 @@ public class MemoryTest
 		AbstractSimulator sim = new InOrderSimulator(memory,registers,new AbstractPipeline[]{pipeline}, reader);
 		while(sim.step());
 		int location = memory.getLocation("memoryOut");
-		int value = memory.getValue(null, location);
 		OutputHelper.output(sim);
 	}
 

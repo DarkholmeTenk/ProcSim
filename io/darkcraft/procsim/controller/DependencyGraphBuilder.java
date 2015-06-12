@@ -47,7 +47,6 @@ public class DependencyGraphBuilder
 		for(IInstruction inst : fromMap.keySet())
 		{
 			List<IDependency> deps = fromMap.get(inst);
-			ArrayList<IDependency> toRem = new ArrayList<IDependency>();
 			for(IDependency a : deps)
 			{
 				for(IDependency b : deps)
