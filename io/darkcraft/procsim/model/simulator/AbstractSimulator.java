@@ -1,5 +1,6 @@
 package io.darkcraft.procsim.model.simulator;
 
+import io.darkcraft.procsim.controller.DependencyType;
 import io.darkcraft.procsim.model.components.abstracts.AbstractPipeline;
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.components.abstracts.IRegisterBank;
@@ -78,4 +79,13 @@ public abstract class AbstractSimulator
 	public abstract int getMaxPipelines();
 
 	public abstract int getFinalStateNum();
+
+	public boolean isImportant(DependencyType dep)
+	{
+		switch(dep)
+		{
+		case RAW: return true;
+		default: return false;
+		}
+	}
 }

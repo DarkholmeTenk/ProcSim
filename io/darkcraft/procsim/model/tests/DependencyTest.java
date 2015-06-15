@@ -23,7 +23,7 @@ public class DependencyTest
 	@Test
 	public void test()
 	{
-		InstructionReader read = new InstructionReader(new File("/home/mbax2sb4/ProcSim/tests/dependencyTestSimpler.txt"));
+		InstructionReader read = new InstructionReader(new File("/home/mbax2sb4/ProcSim/tests/loopMemTest02.txt"));
 		IMemory mem = new StubMem();
 		IRegisterBank reg = new StandardBank(16);
 		AbstractPipeline pipe = new FiveStepPipeline(mem,reg, read);
@@ -31,8 +31,21 @@ public class DependencyTest
 		AbstractSimulator sim = new InOrderSimulator(mem,reg,pipe,read);
 		while(sim.step());
 		List<IDependency> deps = DependencyGraphBuilder.getGraph(sim.getInstructions());
-		for(IDependency dep : deps)
-			System.out.println(dep);
+		System.out.println(deps.size());
+	}
+
+	@Test
+	public void newTest()
+	{
+		InstructionReader read = new InstructionReader(new File("/home/mbax2sb4/ProcSim/tests/loopMemTest02.txt"));
+		IMemory mem = new StubMem();
+		IRegisterBank reg = new StandardBank(16);
+		AbstractPipeline pipe = new FiveStepPipeline(mem,reg, read);
+
+		AbstractSimulator sim = new InOrderSimulator(mem,reg,pipe,read);
+		while(sim.step());
+		List<IDependency> deps = DependencyGraphBuilder.getGraphNew(sim.getInstructions());
+		System.out.println(deps.size());
 	}
 
 }

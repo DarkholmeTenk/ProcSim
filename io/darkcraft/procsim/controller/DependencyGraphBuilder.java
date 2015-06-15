@@ -11,6 +11,7 @@ import io.darkcraft.procsim.model.instruction.instructions.Branch;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -118,6 +119,78 @@ public class DependencyGraphBuilder
 		return inputs;
 	}
 
+	private static Map<Pair<IInstruction,IInstruction>,List<IDependency>> getAllConnectionsNew(List<IInstruction> instructions)
+	{
+		Map<Pair<IInstruction,IInstruction>,List<IDependency>> map = new HashMap();
+		//A map where the key is the instruction being linked to
+		//and the value is a list of all the instructions that link to it.
+		Map<IInstruction,List<IInstruction>> reverseMap = new HashMap();
+		for(int i = 0; i < instructions.size(); i++)
+		{
+			IInstruction a = instructions.get(i);
+			List<IDependency> toList = map.get(a);
+			String aOut = a.getOutputRegister();
+			String[] aInputs = getInputRegisters(a);
+			for(int j = i+1; j < instructions.size(); j++)
+			{
+				IInstruction b = instructions.get(j);
+				if(a == b) continue;
+				String bOut = b.getOutputRegister();
+				String[] bInputs = getInputRegisters(b);
+				List<IDependency> dependencies = new ArrayList<IDependency>(3);
+				if(aOut != null)
+				{
+					for(String bInput : bInputs)
+						if(bInput != null && aOut.equals(bInput))
+							dependencies.add(new RAW(a, b));
+					if(aOut.equals(bOut))
+						dependencies.add(new WAW(a,b));
+				}
+				if(bOut != null)
+				{
+					for(String aInput : aInputs)
+						if(aInput != null && bOut.equals(aInput))
+							dependencies.add(new WAR(a, b));
+				}
+				if(dependencies.size() == 0)continue;
+				Pair<IInstruction,IInstruction> newPair = new Pair(a,b);
+				map.put(newPair,dependencies);
+				if(!reverseMap.containsKey(b))
+				{
+					List<IInstruction> tempList = new ArrayList<IInstruction>();
+					tempList.add(a);
+					reverseMap.put(b,tempList);
+					continue;
+				}
+				List<IInstruction> tempList = reverseMap.get(b);
+				Iterator<IInstruction> fromIter = tempList.iterator();
+				while(fromIter.hasNext())
+				{
+					IInstruction from = fromIter.next();
+					Pair<IInstruction,IInstruction> oldPair = new Pair(from, b);
+					List<IDependency> oldDependencies = map.get(oldPair);
+					for(IDependency d : dependencies)
+					{
+						Iterator<IDependency> iter = oldDependencies.iterator();
+						while(iter.hasNext())
+						{
+							IDependency oldD = iter.next();
+							if(oldD.getType() == d.getType())
+								iter.remove();
+						}
+					}
+					if(oldDependencies.size() == 0)
+					{
+						map.remove(oldPair);
+						fromIter.remove();
+					}
+				}
+				tempList.add(a);
+			}
+		}
+		return map;
+	}
+
 	private static List<IDependency> getAllConnections(List<IInstruction> instructions)
 	{
 		ArrayList<IDependency> dependencies = new ArrayList<IDependency>();
@@ -159,6 +232,16 @@ public class DependencyGraphBuilder
 		return dependencies;
 	}
 
+	public static List<IDependency> getGraphNew(List<IInstruction> instructions)
+	{
+		List<IDependency> dependencies = new ArrayList<IDependency>();
+		Map<Pair<IInstruction,IInstruction>, List<IDependency>> map = getAllConnectionsNew(instructions);
+		for(List<IDependency> dl : map.values())
+			dependencies.addAll(dl);
+
+		return dependencies;
+	}
+
 	/**
 	 * Return true if the second instruction is dependant on the first.
 	 * @param first
@@ -192,7 +275,7 @@ public class DependencyGraphBuilder
 	private static Map<IInstruction,List<IDependency>> getDirDependencies(List<IInstruction>insts, boolean to)
 	{
 		Map<IInstruction,List<IDependency>> map = new HashMap<IInstruction,List<IDependency>>();
-		List<IDependency> dependencies = getGraph(insts);
+		List<IDependency> dependencies = getGraphNew(insts);
 		for(IDependency d : dependencies)
 		{
 			IInstruction k = to ? d.getTo() : d.getFrom();

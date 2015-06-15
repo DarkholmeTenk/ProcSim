@@ -32,6 +32,13 @@ public class GridBagHelper
 		return c;
 	}
 
+	public static GridBagConstraints setWeights(double wx, double wy, GridBagConstraints c)
+	{
+		c.weightx = wx;
+		c.weighty = wy;
+		return c;
+	}
+
 	public static GridBagConstraints getConstraints(int x, int y, int sx, int sy)
 	{
 		GridBagConstraints c = getConstraints(x,y);

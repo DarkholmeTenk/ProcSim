@@ -1,5 +1,6 @@
 package io.darkcraft.procsim.model.dependencies;
 
+import io.darkcraft.procsim.controller.DependencyType;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 
 public interface IDependency
@@ -8,5 +9,7 @@ public interface IDependency
 
 	public IInstruction getTo();
 
-	public String getType();
+	public String getDependentRegister();
+
+	public DependencyType getType();
 }

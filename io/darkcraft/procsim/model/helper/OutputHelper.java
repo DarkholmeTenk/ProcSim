@@ -33,13 +33,14 @@ public class OutputHelper
 
 	public static void output(String[][] stateNames, List<IInstruction[][]> states, List<IInstruction> instructions)
 	{
-		List<List<String>> data = outputData(stateNames,states,instructions);
+		List<List<Pair<IInstruction,String>>> data = outputData(stateNames,states,instructions);
 		for(int i = 0; i < data.size(); i++)
 		{
-			List<String> row = data.get(i);
+			List<Pair<IInstruction,String>> row = data.get(i);
 			for(int j = 0; j < row.size(); j++)
 			{
-				String s = row.get(j);
+				Pair<IInstruction,String> d = row.get(j);
+				String s = d.b;
 				if(j == 0)
 					System.out.format("%-25s|", s);
 				else
@@ -49,7 +50,7 @@ public class OutputHelper
 		}
 	}
 
-	public static List<List<String>> outputData(AbstractSimulator sim)
+	public static List<List<Pair<IInstruction,String>>> outputData(AbstractSimulator sim)
 	{
 		return outputData(sim.getStateNames(), sim.getMap(), sim.getInstructions());
 	}
@@ -64,16 +65,16 @@ public class OutputHelper
 		return 2;
 	}
 
-	public static List<List<String>> outputData(String[][] stateNames, List<IInstruction[][]> states, List<IInstruction> instructions)
+	public static List<List<Pair<IInstruction,String>>> outputData(String[][] stateNames, List<IInstruction[][]> states, List<IInstruction> instructions)
 	{
-		List<List<String>> data = new ArrayList<List<String>>();
+		List<List<Pair<IInstruction,String>>> data = new ArrayList<List<Pair<IInstruction,String>>>();
 		for(int i = 0; i <= instructions.size(); i++)
 		{
-			data.add(new ArrayList<String>());
+			data.add(new ArrayList<Pair<IInstruction,String>>());
 		}
 
 		int row = 0;
-		data.get(0).add("");
+		data.get(0).add(new Pair(null,""));
 		HashSet<Integer> disabledStates = new HashSet<Integer>();
 		int sameCounter = 0;
 		for(int i = 0; i < states.size() - 1; i++)
@@ -93,13 +94,13 @@ public class OutputHelper
 		{
 			if(!disabledStates.contains(count))
 			{
-				data.get(0).add("" + count);
+				data.get(0).add(new Pair(null,"" + count));
 				printedMissing = false;
 			}
 			else
 			{
 				if(!printedMissing)
-					data.get(0).add("...");
+					data.get(0).add(new Pair(null,"..."));
 				printedMissing = true;
 			}
 		}
@@ -110,8 +111,8 @@ public class OutputHelper
 			if(!instruction.hasStarted())
 				continue;
 			boolean hasPrintedDisabled = false;
-			List<String> rd = data.get(row);
-			rd.add(instruction.toString());
+			List<Pair<IInstruction,String>> rd = data.get(row);
+			rd.add(new Pair(instruction,instruction.toString()));
 			for(int i = 0; i < states.size(); i++)
 			{
 				IInstruction[][] current = states.get(i);
@@ -137,7 +138,7 @@ public class OutputHelper
 					if(index == -1)
 						rd.add(null);
 					else
-						rd.add("...");
+						rd.add(new Pair(instruction,"..."));
 				}
 				else if(!disabled)
 				{
@@ -147,13 +148,13 @@ public class OutputHelper
 					else
 					{
 						if(instruction.didLeaveEarly())
-							rd.add("#" + stateNames[pipeline][index]);
+							rd.add(new Pair(instruction,"#" + stateNames[pipeline][index]));
 						else if(instruction.didFail() && index >= exeIndex(stateNames[pipeline]))
-							rd.add("*" + stateNames[pipeline][index]);
+							rd.add(new Pair(instruction,"*" + stateNames[pipeline][index]));
 						else if(index == prevIndex)
-							rd.add("@" + stateNames[pipeline][index]);
+							rd.add(new Pair(instruction,"@" + stateNames[pipeline][index]));
 						else
-							rd.add(stateNames[pipeline][index]);
+							rd.add(new Pair(instruction, stateNames[pipeline][index]));
 						prevIndex = index;
 					}
 				}

@@ -1,6 +1,5 @@
 package io.darkcraft.procsim.model.simulator;
 
-import io.darkcraft.procsim.controller.DependencyGraphBuilder;
 import io.darkcraft.procsim.model.components.abstracts.AbstractPipeline;
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.components.abstracts.IRegisterBank;
@@ -48,16 +47,8 @@ public class SuperScalarSimulator extends InOrderSimulator
 			mainPipeline:
 			for(AbstractPipeline p : pipeline)
 			{
-				IInstruction mayRun = p.getInstruction(i);
-				if(mayRun == null) continue;
-				for(AbstractPipeline p2 : pipeline)
-				{
-					if(p2 == p) continue;
-					IInstruction potentialConflict = p2.getInstruction(i);
-					if(potentialConflict == null || (potentialConflict.getStartTime() >= mayRun.getStartTime())) continue;
-					if(DependencyGraphBuilder.isDependant(mayRun, potentialConflict)) continue mainPipeline;
-				}
 				p.stepStage(this, i);
+				if(p.getInstruction(i) != null) break;
 			}
 		}
 		return !allEmpty;
