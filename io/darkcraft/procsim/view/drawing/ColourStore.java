@@ -9,7 +9,7 @@ import java.util.Map;
 public class ColourStore
 {
 	private static int[] colorMap = new int[]{
-
+/*
 									0xC00000, // Red 0
 	                                0xD2B300, // Vivid Yellow 1
 	                                0x3366FF, // Light blue 2
@@ -31,7 +31,33 @@ public class ColourStore
 	                                0x93AA00, // Vivid Yellowish Green 15
 	                                0x593315, // Deep Yellowish Brown 16
 	                                0xF13A13, // Vivid Reddish Orange 17
-	                                0x232C16};// Dark Olive Green 18
+	                                0x232C16};// Dark Olive Green 18*/
+		//0xF0A3FF,
+		0x00B1DC,
+		0x993F00,
+		0x4C005C,
+		0x191919,
+		0x005C31,
+		0x2BCE48,
+		0xFFCC99,
+		0x808080,
+		0x94FFB5,
+		0x8F7C00,
+		0x9DCC00,
+		0xC20088,
+		0x003380,
+		0xFFA405,
+		0xFFA8BB,
+		0x426600,
+		0xFF0010,
+		0x5EF1F1,
+		0x00998F,
+		0xE0FF66,
+		0x740AE1,
+		0x990000,
+		0xFFFF80,
+		0xFFE100,
+		0xFF5005};
 	private static List<Color> colors;
 	private static Map<String,Integer> strMap = new HashMap<String,Integer>();
 

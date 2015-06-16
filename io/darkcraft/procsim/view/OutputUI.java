@@ -42,7 +42,7 @@ public class OutputUI implements ActionListener
 	public boolean[]			importantDependencyType;
 	public OutputController		controller;
 
-	private static final Color bg = Color.DARK_GRAY;
+	private static final Color bg = Color.WHITE;
 	public OutputUI(AbstractSimulator _sim)
 	{
 		controller = new OutputController(this, _sim);

@@ -45,9 +45,9 @@ public class OutputController
 																				}
 																			};;
 
-	private static final Color bgColor1 = Color.getHSBColor(0, 0, 0.3f);
-	private static final Color bgColor2 = Color.GRAY;
-	private static final Color fg = Color.LIGHT_GRAY;
+	private static final Color bgColor1 = Color.getHSBColor(0, 0, 0.9f);
+	private static final Color bgColor2 = Color.LIGHT_GRAY;
+	private static final Color fg = Color.BLACK;
 
 	public OutputController(OutputUI parent, AbstractSimulator sim)
 	{
