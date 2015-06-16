@@ -76,7 +76,7 @@ public abstract class AbstractInstruction implements IInstruction
 
 	protected String getID()
 	{
-		return String.format("[%3d]", id);
+		return String.format("[%03d] ", id);
 	}
 
 	@Override

@@ -91,7 +91,6 @@ public class DrawingSurface extends JPanel implements ActionListener
 	{
 		g.setPaint(a.c);
 		DependencyType d = a.t;
-		double angle = 0;
 		int spokes;
 		switch(d)
 		{

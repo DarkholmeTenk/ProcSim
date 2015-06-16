@@ -33,33 +33,6 @@ public class DependencyGraphBuilder
 		return total;
 	}
 
-	private static HashMap<IInstruction,List<IDependency>> buildFromMap(List<IDependency> dependencies)
-	{
-		HashMap<IInstruction,List<IDependency>> fromMap = new HashMap<IInstruction,List<IDependency>>();
-		for(IDependency dependency : dependencies)
-		{
-			IInstruction from = dependency.getFrom();
-			if(!fromMap.containsKey(from))
-				fromMap.put(from, new ArrayList<IDependency>());
-			List<IDependency> list = fromMap.get(from);
-			list.add(dependency);
-		}
-		return fromMap;
-	}
-
-	private static int linkExists(HashMap<IInstruction,List<IDependency>> fromMap, IInstruction from, IInstruction to, String type)
-	{
-		List<IDependency> dependencies = fromMap.get(from);
-		if(dependencies == null || dependencies.size() == 0) return -1;
-		for(int i = 0; i < dependencies.size(); i++)
-		{
-			IDependency dep = dependencies.get(i);
-			if(dep.getTo().equals(to) && dep.getType().equals(type))
-				return i;
-		}
-		return -1;
-	}
-
 	private static List<IDependency> removeTransitives(List<IDependency> dependencies, List<IInstruction> insts)
 	{
 		HashMap<Pair<IInstruction,IInstruction>,List<IDependency>> map = buildTotalMap(dependencies);
@@ -67,7 +40,6 @@ public class DependencyGraphBuilder
 		{
 			IInstruction from = pair.a;
 			IInstruction to = pair.b;
-			List<IDependency> list = map.get(pair);
 			for(IInstruction i : insts)
 			{
 				if(i.equals(from) || i.equals(to)) continue;
@@ -83,22 +55,6 @@ public class DependencyGraphBuilder
 							dependencies.remove(b);
 			}
 		}
-		/*
-		for(IInstruction inst : fromMap.keySet())
-		{
-			List<IDependency> deps = fromMap.get(inst);
-			for(IDependency a : deps)
-			{
-				for(IDependency b : deps)
-				{
-					if(a.equals(b)) continue;
-					if(!a.getType().equals(b.getType())) continue;
-					int link = linkExists(fromMap,a.getTo(),b.getTo(),a.getType());
-					if(link != -1)
-						dependencies.remove(b);
-				}
-			}
-		}*/
 		return dependencies;
 	}
 
@@ -128,7 +84,6 @@ public class DependencyGraphBuilder
 		for(int i = 0; i < instructions.size(); i++)
 		{
 			IInstruction a = instructions.get(i);
-			List<IDependency> toList = map.get(a);
 			String aOut = a.getOutputRegister();
 			String[] aInputs = getInputRegisters(a);
 			for(int j = i+1; j < instructions.size(); j++)
@@ -142,7 +97,10 @@ public class DependencyGraphBuilder
 				{
 					for(String bInput : bInputs)
 						if(bInput != null && aOut.equals(bInput))
+						{
 							dependencies.add(new RAW(a, b));
+							break;
+						}
 					if(aOut.equals(bOut))
 						dependencies.add(new WAW(a,b));
 				}
@@ -150,7 +108,10 @@ public class DependencyGraphBuilder
 				{
 					for(String aInput : aInputs)
 						if(aInput != null && bOut.equals(aInput))
+						{
 							dependencies.add(new WAR(a, b));
+							break;
+						}
 				}
 				if(dependencies.size() == 0)continue;
 				Pair<IInstruction,IInstruction> newPair = new Pair(a,b);
@@ -167,21 +128,33 @@ public class DependencyGraphBuilder
 				while(fromIter.hasNext())
 				{
 					IInstruction from = fromIter.next();
-					Pair<IInstruction,IInstruction> oldPair = new Pair(from, b);
-					List<IDependency> oldDependencies = map.get(oldPair);
-					for(IDependency d : dependencies)
+					Pair<IInstruction,IInstruction> pairOne = new Pair(from, b);
+					Pair<IInstruction,IInstruction> pairTwo = new Pair(from, a);
+					List<IDependency> dependenciesOne = map.get(pairOne);
+					List<IDependency> dependenciesTwo = map.get(pairTwo);
+					if(dependenciesOne == null)
 					{
-						Iterator<IDependency> iter = oldDependencies.iterator();
-						while(iter.hasNext())
+						fromIter.remove();
+						continue;
+					}
+					if(dependenciesTwo == null) continue;
+					for(IDependency dOne : dependencies)	//For all the dependencies we're adding (a->b)
+					{
+						for(IDependency dTwo : dependenciesTwo)	//For all the dependencies which lead to current start (from->a)
 						{
-							IDependency oldD = iter.next();
-							if(oldD.getType() == d.getType())
-								iter.remove();
+							if(dOne.getType() != dTwo.getType()) continue;	//If they are not the same, try the next combo
+							Iterator<IDependency> iter = dependenciesOne.iterator();
+							while(iter.hasNext())	//For all the ones leading to current end (from->b)
+							{
+								IDependency oldD = iter.next();
+								if(oldD.getType() == dOne.getType())		//If it's the same type as the other 2 deps
+									iter.remove();							//Remove it (from->b leaving from->a and a->b)
+							}
 						}
 					}
-					if(oldDependencies.size() == 0)
+					if(dependenciesOne.size() == 0)
 					{
-						map.remove(oldPair);
+						map.remove(pairOne);
 						fromIter.remove();
 					}
 				}

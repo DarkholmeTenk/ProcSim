@@ -10,35 +10,35 @@ public class ColourStore
 {
 	private static int[] colorMap = new int[]{
 
-									0xC00000, // Red
-	                                0xD2B300, // Vivid Yellow
-	                                0x3366FF, // Light blue
-	                                0xC13EB5, // Strong Purple
-	                                0xFF6800, // Vivid Orange
-	                             //   0xA6BDD7, // Very Light Blue
+									0xC00000, // Red 0
+	                                0xD2B300, // Vivid Yellow 1
+	                                0x3366FF, // Light blue 2
+	                                0xD14EC5, // Strong Purple 3
+	                                0xFF6800, // Vivid Orange 4
+	                                0xA6BDD7, // Very Light Blue 5
 	                             //   0xCEA262, // Grayish Yellow
 
 	                                // The following don't work well for people with defective color vision
-	                                0x007D34, // Vivid Green
-	                                0xF6768E, // Strong Purplish Pink
-	                                0x00538A, // Strong Blue
-	                                0xFF7A5C, // Strong Yellowish Pink
-	                                0x53377A, // Strong Violet
-	                                0xFF8E00, // Vivid Orange Yellow
-	                                0xB32851, // Strong Purplish Red
-	                                0xF4C800, // Vivid Greenish Yellow
-	                                0x7F180D, // Strong Reddish Brown
-	                                0x93AA00, // Vivid Yellowish Green
-	                                0x593315, // Deep Yellowish Brown
-	                                0xF13A13, // Vivid Reddish Orange
-	                                0x232C16};// Dark Olive Green
+	                                0x007D34, // Vivid Green 6
+	                                0xF6768E, // Strong Purplish Pink 7
+	                                0x00538A, // Strong Blue 8
+	                                0xFF8A6C, // Strong Yellowish Pink 9
+	                                0x8367AA, // Strong Violet 10
+	                                0xFF8E00, // Vivid Orange Yellow 11
+	                                0xB32851, // Strong Purplish Red 12
+	                                0xFFD000, // Vivid Greenish Yellow 13
+	                                0x7F180D, // Strong Reddish Brown 14
+	                                0x93AA00, // Vivid Yellowish Green 15
+	                                0x593315, // Deep Yellowish Brown 16
+	                                0xF13A13, // Vivid Reddish Orange 17
+	                                0x232C16};// Dark Olive Green 18
 	private static List<Color> colors;
 	private static Map<String,Integer> strMap = new HashMap<String,Integer>();
 
 	static
 	{
 		colors = new ArrayList<Color>();
-		colors.add(Color.BLACK);
+		//colors.add(Color.BLACK);
 		for(int i : colorMap)
 		{
 			int r = (i & 0xFF0000) >> 16;

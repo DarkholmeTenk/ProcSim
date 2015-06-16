@@ -88,4 +88,9 @@ public abstract class AbstractSimulator
 		default: return false;
 		}
 	}
+
+	public int getLastIDStage(int pl)
+	{
+		return pipeline[pl].getLastIDStage();
+	}
 }

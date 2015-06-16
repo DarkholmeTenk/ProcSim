@@ -17,9 +17,10 @@ public class StandardBank implements IRegisterBank
 		for(int i = 0; i < size -4; i++)
 			registers[i] = new Register("R"+i,0);
 		registers[size-4] = new Register("SP",0);
-		registers[size-3] = new Register("LR",0);
-		registers[size-2] = new PCReg(0);
-		registers[size-1] = new CPSRReg(0);
+		registers[size-3] = new CPSRReg(0);
+		registers[size-2] = new Register("LR",0);
+		registers[size-1] = new PCReg(0);
+
 	}
 
 	@Override
@@ -38,7 +39,7 @@ public class StandardBank implements IRegisterBank
 			try
 			{
 				Integer i = Integer.parseInt(num);
-				if (i < size - 4 && i >= 0)
+				if (i < size && i >= 0)
 					return i;
 			}
 			catch (Exception e)
@@ -50,11 +51,11 @@ public class StandardBank implements IRegisterBank
 		if (name.equalsIgnoreCase("SP"))
 			return size - 4;
 		if (name.equalsIgnoreCase("LR"))
-			return size - 3;
-		if (name.equalsIgnoreCase("PC"))
 			return size - 2;
-		if (name.equalsIgnoreCase("CPSR"))
+		if (name.equalsIgnoreCase("PC"))
 			return size - 1;
+		if (name.equalsIgnoreCase("CPSR"))
+			return size - 3;
 		return -1;
 	}
 

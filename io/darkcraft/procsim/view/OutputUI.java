@@ -7,6 +7,7 @@ import io.darkcraft.procsim.model.helper.KeyboardListener;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 import io.darkcraft.procsim.view.drawing.DrawingSurface;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -41,6 +42,7 @@ public class OutputUI implements ActionListener
 	public boolean[]			importantDependencyType;
 	public OutputController		controller;
 
+	private static final Color bg = Color.DARK_GRAY;
 	public OutputUI(AbstractSimulator _sim)
 	{
 		controller = new OutputController(this, _sim);
@@ -54,11 +56,15 @@ public class OutputUI implements ActionListener
 		mainFrame.setLayout(GridBagHelper.getLayout());
 		mainFrame.add(mainContainer, GridBagHelper.setWeights(1, GridBagHelper.getConstraints(1, 1, 10, 10)));
 		dataPanel = new JPanel();
+		dataPanel.setBackground(bg);
 		dataPanel.setLayout(GridBagHelper.getLayout());
 		instructionPanel = new JPanel();
+		instructionPanel.setBackground(bg);
 		instructionPanel.setLayout(GridBagHelper.getLayout());
 		surface = new DrawingSurface();
 		layered = new JLayeredPane();
+		layered.setBackground(bg);
+		layered.setOpaque(true);
 		layered.setLayout(GridBagHelper.getLayout());
 		layered.setLayer(surface, 1, 2);
 		layered.setLayer(dataPanel, 0, 0);
@@ -81,7 +87,7 @@ public class OutputUI implements ActionListener
 		instructionPane.setMinimumSize(new Dimension(instructionPane.getWidth() + 5, 1));
 		mainContainer.add(pane);
 		mainFrame.pack();
-		pane.setPreferredSize(new Dimension(dataPanel.getPreferredSize().width + 5, dataPanel.getPreferredSize().height + 25));
+		pane.setPreferredSize(new Dimension(dataPanel.getPreferredSize().width + 5, dataPanel.getPreferredSize().height + 22));
 		pane.setMinimumSize(new Dimension(Math.min(1000, mainFrame.getWidth()), Math.min(800, mainFrame.getHeight())));
 		surface.setPreferredSize(dataPanel.getPreferredSize());
 		int x = (int) Math.round(pane.getPreferredSize().getWidth()) + instructionPane.getWidth() + 40;
@@ -149,6 +155,7 @@ public class OutputUI implements ActionListener
 				toChange *= KeyboardListener.isShiftDown() ? 10 : 1;
 			stateNum = Math.min(maxStateNum, Math.max(1, stateNum + toChange));
 			dataPanel.removeAll();
+			controller.clear();
 			controller.fillResults(stateNum);
 			controller.addArrowsToSurface();
 			dataPanel.setVisible(true);

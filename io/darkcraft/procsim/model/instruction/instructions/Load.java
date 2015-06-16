@@ -101,7 +101,7 @@ public class Load extends AbstractInstruction implements IMemoryInstruction
 	public String toString()
 	{
 		return getID() + "LDR"+c.getName() + " " + out + " " +  (address != null ? address :
-			(register[0] + (register.length == 2 ? " " +register[2] :"#" + offset)));
+			(register[0] + (register.length == 2 ? " " +register[2] :" #" + offset)));
 	}
 
 	@Override

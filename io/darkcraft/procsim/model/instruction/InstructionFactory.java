@@ -18,6 +18,7 @@ public class InstructionFactory
 		int comment = line.indexOf(';');
 		if(comment != -1)
 			line = line.substring(0,comment);
+		line = line.trim();
 		String[] data = line.split(ReadingHelper.splitRegex,2);
 		data[0] = data[0].toUpperCase();
 		Conditional c = Conditional.get(data[0]);

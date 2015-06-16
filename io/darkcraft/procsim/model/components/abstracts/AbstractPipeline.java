@@ -60,4 +60,6 @@ public abstract class AbstractPipeline
 	public abstract IInstruction getInstruction(int stage);
 	public abstract void stepStage(AbstractSimulator sim, int stage);
 	public abstract void increaseTimer();
+
+	public abstract int getLastIDStage();
 }

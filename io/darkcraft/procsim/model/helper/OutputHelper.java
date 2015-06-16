@@ -28,12 +28,12 @@ public class OutputHelper
 
 	public static void output(AbstractSimulator sim)
 	{
-		output(sim.getStateNames(), sim.getMap(), sim.getInstructions());
+		output(sim, sim.getStateNames(), sim.getMap(), sim.getInstructions());
 	}
 
-	public static void output(String[][] stateNames, List<IInstruction[][]> states, List<IInstruction> instructions)
+	public static void output(AbstractSimulator sim, String[][] stateNames, List<IInstruction[][]> states, List<IInstruction> instructions)
 	{
-		List<List<Pair<IInstruction,String>>> data = outputData(stateNames,states,instructions);
+		List<List<Pair<IInstruction,String>>> data = outputData(sim,stateNames,states,instructions);
 		for(int i = 0; i < data.size(); i++)
 		{
 			List<Pair<IInstruction,String>> row = data.get(i);
@@ -52,7 +52,7 @@ public class OutputHelper
 
 	public static List<List<Pair<IInstruction,String>>> outputData(AbstractSimulator sim)
 	{
-		return outputData(sim.getStateNames(), sim.getMap(), sim.getInstructions());
+		return outputData(sim, sim.getStateNames(), sim.getMap(), sim.getInstructions());
 	}
 
 	private static int exeIndex(String[] stateNames)
@@ -65,7 +65,7 @@ public class OutputHelper
 		return 2;
 	}
 
-	public static List<List<Pair<IInstruction,String>>> outputData(String[][] stateNames, List<IInstruction[][]> states, List<IInstruction> instructions)
+	public static List<List<Pair<IInstruction,String>>> outputData(AbstractSimulator sim, String[][] stateNames, List<IInstruction[][]> states, List<IInstruction> instructions)
 	{
 		List<List<Pair<IInstruction,String>>> data = new ArrayList<List<Pair<IInstruction,String>>>();
 		for(int i = 0; i <= instructions.size(); i++)
@@ -113,6 +113,7 @@ public class OutputHelper
 			boolean hasPrintedDisabled = false;
 			List<Pair<IInstruction,String>> rd = data.get(row);
 			rd.add(new Pair(instruction,instruction.toString()));
+			boolean wasStalled = false;
 			for(int i = 0; i < states.size(); i++)
 			{
 				IInstruction[][] current = states.get(i);
@@ -147,15 +148,19 @@ public class OutputHelper
 						rd.add(null);
 					else
 					{
+						boolean stall = index == prevIndex;
 						if(instruction.didLeaveEarly())
-							rd.add(new Pair(instruction,"#" + stateNames[pipeline][index]));
+							rd.add(new Pair(instruction,";" + stateNames[pipeline][index]));
 						else if(instruction.didFail() && index >= exeIndex(stateNames[pipeline]))
 							rd.add(new Pair(instruction,"*" + stateNames[pipeline][index]));
-						else if(index == prevIndex)
+						else if(stall)
 							rd.add(new Pair(instruction,"@" + stateNames[pipeline][index]));
+						else if(!stall && wasStalled && index == (1+sim.getLastIDStage(pipeline)))
+							rd.add(new Pair(instruction,"?" + stateNames[pipeline][index]));
 						else
 							rd.add(new Pair(instruction, stateNames[pipeline][index]));
 						prevIndex = index;
+						wasStalled = stall;
 					}
 				}
 			}

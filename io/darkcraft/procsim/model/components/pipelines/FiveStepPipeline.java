@@ -136,7 +136,11 @@ public class FiveStepPipeline extends AbstractPipeline
 			if(o != null)
 			{
 				Register r = registers.get(o);
-				allReady = r.lock(id);
+				if(r != null)
+					allReady = r.lock(id);
+				else
+					throw new RuntimeException("No register named : " + o);
+
 			}
 			if(allReady)
 			{
@@ -331,6 +335,12 @@ public class FiveStepPipeline extends AbstractPipeline
 		if(p != null)
 			return p.a;
 		return null;
+	}
+
+	@Override
+	public int getLastIDStage()
+	{
+		return 1;
 	}
 
 }

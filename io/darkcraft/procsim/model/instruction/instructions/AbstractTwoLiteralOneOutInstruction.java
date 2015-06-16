@@ -69,14 +69,10 @@ public abstract class AbstractTwoLiteralOneOutInstruction extends AbstractInstru
 	protected String toString(int i)
 	{
 		String s = " ";
-		if(inR[i] != null) s += inR[i];
-		if(vals[i] != null)
-		{
-			if(inR[i] != null);
-			//	s+= "("+vals[i]+")";
-			else
-				s+= "#"+vals[i];
-		}
+		if(inR[i] != null)
+			s += inR[i];
+		else
+			s+= "#"+vals[i];
 		return s;
 	}
 
