@@ -1,6 +1,7 @@
 package io.darkcraft.procsim.controller;
 
 import io.darkcraft.procsim.model.dependencies.IDependency;
+import io.darkcraft.procsim.model.helper.MapList;
 import io.darkcraft.procsim.model.helper.OutputHelper;
 import io.darkcraft.procsim.model.helper.Pair;
 import io.darkcraft.procsim.model.instruction.IInstruction;
@@ -30,20 +31,8 @@ public class OutputController
 	private List<List<Pair<IInstruction, String>>>				fillData	= null;
 	private List<IInstruction>									insts		= null;
 	private Map<Pair<Integer, Integer>, List<ArrowDataStore>>	links		= new HashMap();
-	private Comparator<IDependency>								depComp		= new Comparator<IDependency>()
-																			{
-																				@Override
-																				public int compare(IDependency a, IDependency b)
-																				{
-																					if (a == null && b == null)
-																						return 0;
-																					if (a == null)
-																						return 1;
-																					if (b == null)
-																						return -1;
-																					return Integer.compare(a.getFrom().getStartTime(), b.getFrom().getStartTime());
-																				}
-																			};;
+	private Comparator<IDependency>								depComp		= new DependencyComparator();
+	private MapList<String,JLabel>								registerLabelMap = new MapList();
 
 	private static final Color bgColor1 = Color.getHSBColor(0, 0, 0.9f);
 	private static final Color bgColor2 = Color.LIGHT_GRAY;
@@ -114,7 +103,7 @@ public class OutputController
 					if(x > 1)
 					{
 						if(!temp.startsWith("#"))
-							label.setForeground(ColourStore.getColor(temp));
+							registerLabelMap.add(temp, label);
 					}
 					label.setOpaque(true);
 					toFill.instructionPanel.add(label, GridBagHelper.getConstraints(x,i));
@@ -122,6 +111,12 @@ public class OutputController
 			else
 				toFill.instructionPanel.add(label, GridBagHelper.getConstraints(j, i, 4, 1));
 		}
+	}
+
+	private void color(String register, Color c)
+	{
+		for(JLabel l : registerLabelMap.getList(register))
+			l.setForeground(c);
 	}
 
 	private Dimension minimal = new Dimension(0,0);
