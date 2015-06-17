@@ -124,6 +124,7 @@ public class OutputController
 		}
 	}
 
+	private Dimension minimal = new Dimension(0,0);
 	public void fillResults(int upTo)
 	{
 		if (insts == null)
@@ -162,6 +163,7 @@ public class OutputController
 		if (upTo < fillData.get(0).size() - 1)
 		{
 			JLabel l = new JLabel("");
+			l.setPreferredSize(minimal);
 			toFill.dataPanel.add(l, GridBagHelper.setWeights(0, 1, GridBagHelper.getConstraints(2 * upTo + 1, lowestY + 1)));
 		}
 	}
@@ -242,17 +244,36 @@ public class OutputController
 
 			for (Pair<Integer, Integer> i : links.keySet())
 			{
-				if (i.a > toFill.stateNum)
-					continue;
 				List<ArrowDataStore> arrows = links.get(i);
 				int count = 1;
 				for (ArrowDataStore arrow : arrows)
 				{
+					int sX = arrow.startX;
+					int sY = arrow.startY;
+					int eX = arrow.endX;
+					int eY = arrow.endY;
+					if(eX > toFill.stateNum)
+					{
+						if(toFill.stateNum <= 1) continue;
+						String desiredState = fillData.get(eY).get(eX-1).b;
+						String currentState = fillData.get(eY).get(toFill.stateNum).b;
+						if(!desiredState.equals(currentState))
+						{
+							if(currentState.equals("..."))
+							{
+								if(!desiredState.equals(fillData.get(eY).get(toFill.stateNum-1).b))
+									continue;
+							}
+							else
+								continue;
+						}
+						eX = sX = toFill.stateNum;
+					}
 					double yO = (count++ / (double) (arrows.size() + 1)) * OutputUI.preferredSize.getHeight();
-					double x1 = arrow.startX * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth()) - OutputUI.gapSize.getWidth() - 7;
-					double y1 = (arrow.startY + 1) * (OutputUI.preferredSize.getHeight() + 4) - 8;
-					double x2 = (arrow.endX - 1) * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth()) + 3;
-					double y2 = arrow.endY * (OutputUI.preferredSize.getHeight() + 4) + 3 + yO;
+					double x1 = sX * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth()) - OutputUI.gapSize.getWidth() - 7;
+					double y1 = (sY + 1) * (OutputUI.preferredSize.getHeight() + 4) - 8;
+					double x2 = (eX - 1) * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth()) + 3;
+					double y2 = eY * (OutputUI.preferredSize.getHeight() + 4) + 3 + yO;
 					Color c = ColourStore.getColor(arrow.dep.getDependentRegister());
 					toFill.surface.addStar(x1, y1, x2, y2, c, arrow.dep.getType());
 				}
@@ -272,5 +293,10 @@ public class OutputController
 	public void clear()
 	{
 
+	}
+
+	public int getMaxStateNum()
+	{
+		return fillData.get(0).size() - 1;
 	}
 }

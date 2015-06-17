@@ -98,7 +98,7 @@ public class FiveStepPipeline extends AbstractPipeline
 						sim.clearAfter(exe.getStartTime());
 						sim.flushInstructionCache();
 					}
-					if("PC".equals(exe.getOutputRegister()))
+					else if("PC".equals(exe.getOutputRegister()))
 					{
 						sim.clearAfter(exe.getStartTime());
 						sim.flushInstructionCache();

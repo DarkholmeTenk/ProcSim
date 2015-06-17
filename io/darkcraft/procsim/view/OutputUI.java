@@ -80,14 +80,14 @@ public class OutputUI implements ActionListener
 		runSim();
 		controller.addText("Instructions", 0, 0);
 		controller.fillInstructions();
-		controller.fillResults(stateNum = maxStateNum = sim.getFinalStateNum());
+		controller.fillResults(stateNum = maxStateNum = controller.getMaxStateNum());
 		controller.addArrowsToSurface();
 		mainContainer.add(instructionPane);
 		mainFrame.pack();
 		instructionPane.setMinimumSize(new Dimension(instructionPane.getWidth() + 5, 1));
 		mainContainer.add(pane);
 		mainFrame.pack();
-		pane.setPreferredSize(new Dimension(dataPanel.getPreferredSize().width + 5, dataPanel.getPreferredSize().height + 22));
+		pane.setPreferredSize(new Dimension(dataPanel.getPreferredSize().width + 5, dataPanel.getPreferredSize().height + 24));
 		pane.setMinimumSize(new Dimension(Math.min(1000, mainFrame.getWidth()), Math.min(800, mainFrame.getHeight())));
 		surface.setPreferredSize(dataPanel.getPreferredSize());
 		int x = (int) Math.round(pane.getPreferredSize().getWidth()) + instructionPane.getWidth() + 40;

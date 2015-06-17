@@ -7,8 +7,8 @@ import java.awt.event.KeyEvent;
 public class KeyboardListener
 {
 
-	private static boolean	shift;
-	private static boolean	ctrl;
+	private static boolean	shift	= false;
+	private static boolean	ctrl	= false;
 
 	static
 	{

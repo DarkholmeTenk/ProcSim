@@ -3,6 +3,7 @@ package io.darkcraft.procsim.model.instruction;
 import io.darkcraft.procsim.model.helper.ReadingHelper;
 import io.darkcraft.procsim.model.instruction.instructions.Add;
 import io.darkcraft.procsim.model.instruction.instructions.Branch;
+import io.darkcraft.procsim.model.instruction.instructions.BranchLink;
 import io.darkcraft.procsim.model.instruction.instructions.Compare;
 import io.darkcraft.procsim.model.instruction.instructions.Load;
 import io.darkcraft.procsim.model.instruction.instructions.Move;
@@ -34,6 +35,8 @@ public class InstructionFactory
 			return Move.create(c,id,data[1]);
 		if(data[0].startsWith("CMP"))
 			return Compare.create(c,id,data[1]);
+		if(data[0].startsWith("BL"))
+			return BranchLink.create(c,id,data[1]);
 		if(data[0].startsWith("B"))
 			return new Branch(c,id,data[1]);
 		if(data[0].startsWith("NOP"))

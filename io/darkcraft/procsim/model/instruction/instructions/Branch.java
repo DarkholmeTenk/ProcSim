@@ -6,7 +6,7 @@ import io.darkcraft.procsim.model.instruction.InstructionReader;
 
 public class Branch extends AbstractInstruction
 {
-	private String		addrMnem	= null;
+	protected String		addrMnem	= null;
 	protected String[]	register	= null;
 	private int			addr;
 	private int			offset		= 0;
@@ -60,7 +60,7 @@ public class Branch extends AbstractInstruction
 	@Override
 	public String getOutputRegister()
 	{
-		return "PC";
+		return null;
 	}
 
 	@Override

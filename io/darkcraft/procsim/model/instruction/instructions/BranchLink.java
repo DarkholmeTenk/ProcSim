@@ -1,27 +1,38 @@
 package io.darkcraft.procsim.model.instruction.instructions;
 
-import io.darkcraft.procsim.model.helper.ReadingHelper;
 import io.darkcraft.procsim.model.instruction.Conditional;
+import io.darkcraft.procsim.model.instruction.IInstruction;
 
 public class BranchLink extends Branch
 {
-	private static final String[] pcin = new String[]{"PC"};
+	private int oldPC;
 	public BranchLink(Conditional c, int id, String address)
 	{
 		super(c, id, address);
-		register = pcin;
+		oldPC = (id << 2) + 4;
 	}
 
-	public BranchLink(Conditional c, int id, String _reg, String _off)
+	public static IInstruction create(Conditional c, int id, String string)
 	{
-		super(c, id, _reg, _off);
-		Integer off = ReadingHelper.literal(_off);
-		if (_off == null)
-			off = 0;
-		if (off == null)
-			register = new String[]{ "PC", _reg, _off };
-		else
-			register = new String[]{ "PC", _reg };
+		return new BranchLink(c, id, string);
 	}
-	//TODO: loopback
+
+	@Override
+	public String getOutputRegister()
+	{
+		return "LR";
+	}
+
+	@Override
+	public int getOutputRegisterValue()
+	{
+		return oldPC;
+	}
+
+	@Override
+	public String toString()
+	{
+		return getID()+"BL" + c + " " + addrMnem;
+
+	}
 }
