@@ -4,38 +4,34 @@ import io.darkcraft.procsim.model.dependencies.IDependency;
 import io.darkcraft.procsim.model.dependencies.RAW;
 import io.darkcraft.procsim.model.dependencies.WAR;
 import io.darkcraft.procsim.model.dependencies.WAW;
+import io.darkcraft.procsim.model.helper.MapList;
 import io.darkcraft.procsim.model.helper.Pair;
 import io.darkcraft.procsim.model.instruction.Conditional;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.instructions.Branch;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 public class DependencyGraphBuilder
 {
-	private static HashMap<Pair<IInstruction,IInstruction>,List<IDependency>> buildTotalMap(List<IDependency> dependencies)
+	private static MapList<Pair<IInstruction,IInstruction>,IDependency> buildTotalMap(List<IDependency> dependencies)
 	{
-		HashMap<Pair<IInstruction,IInstruction>,List<IDependency>> total = new HashMap();
+		MapList<Pair<IInstruction,IInstruction>,IDependency> total = new MapList();
 		for(IDependency dependency : dependencies)
 		{
 			IInstruction from = dependency.getFrom();
 			IInstruction to = dependency.getTo();
 			Pair<IInstruction,IInstruction> pair = new Pair<IInstruction,IInstruction>(from,to);
-			if(!total.containsKey(pair))
-				total.put(pair, new ArrayList<IDependency>());
-			List<IDependency> list = total.get(pair);
-			list.add(dependency);
+			total.add(pair,dependency);
 		}
 		return total;
 	}
 
 	private static List<IDependency> removeTransitives(List<IDependency> dependencies, List<IInstruction> insts)
 	{
-		HashMap<Pair<IInstruction,IInstruction>,List<IDependency>> map = buildTotalMap(dependencies);
+		MapList<Pair<IInstruction,IInstruction>,IDependency> map = buildTotalMap(dependencies);
 		for(Pair<IInstruction,IInstruction> pair : map.keySet())
 		{
 			IInstruction from = pair.a;
@@ -47,8 +43,8 @@ public class DependencyGraphBuilder
 				if(!map.containsKey(pairTwo)) continue;
 				Pair<IInstruction,IInstruction> pairThree = new Pair(from,i);
 				if(!map.containsKey(pairThree)) continue;
-				List<IDependency> depListOne = map.get(pairTwo);
-				List<IDependency> depListTwo = map.get(pairThree);
+				List<IDependency> depListOne = map.getList(pairTwo);
+				List<IDependency> depListTwo = map.getList(pairThree);
 				for(IDependency a : depListOne)
 					for(IDependency b : depListTwo)
 						if(a.getType().equals(b.getType()))
@@ -75,12 +71,12 @@ public class DependencyGraphBuilder
 		return inputs;
 	}
 
-	private static Map<Pair<IInstruction,IInstruction>,List<IDependency>> getAllConnectionsNew(List<IInstruction> instructions)
+	private static MapList<Pair<IInstruction,IInstruction>,IDependency> getAllConnectionsNew(List<IInstruction> instructions)
 	{
-		Map<Pair<IInstruction,IInstruction>,List<IDependency>> map = new HashMap();
+		MapList<Pair<IInstruction,IInstruction>,IDependency> map = new MapList();
 		//A map where the key is the instruction being linked to
 		//and the value is a list of all the instructions that link to it.
-		Map<IInstruction,List<IInstruction>> reverseMap = new HashMap();
+		MapList<IInstruction,IInstruction> reverseMap = new MapList();
 		for(int i = 0; i < instructions.size(); i++)
 		{
 			IInstruction a = instructions.get(i);
@@ -118,20 +114,17 @@ public class DependencyGraphBuilder
 				map.put(newPair,dependencies);
 				if(!reverseMap.containsKey(b))
 				{
-					List<IInstruction> tempList = new ArrayList<IInstruction>();
-					tempList.add(a);
-					reverseMap.put(b,tempList);
+					reverseMap.add(b, a);
 					continue;
 				}
-				List<IInstruction> tempList = reverseMap.get(b);
-				Iterator<IInstruction> fromIter = tempList.iterator();
+				Iterator<IInstruction> fromIter = reverseMap.iterator(b);
 				while(fromIter.hasNext())
 				{
 					IInstruction from = fromIter.next();
 					Pair<IInstruction,IInstruction> pairOne = new Pair(from, b);
 					Pair<IInstruction,IInstruction> pairTwo = new Pair(from, a);
-					List<IDependency> dependenciesOne = map.get(pairOne);
-					List<IDependency> dependenciesTwo = map.get(pairTwo);
+					List<IDependency> dependenciesOne = map.getList(pairOne);
+					List<IDependency> dependenciesTwo = map.getList(pairTwo);
 					if(dependenciesOne == null)
 					{
 						fromIter.remove();
@@ -158,7 +151,7 @@ public class DependencyGraphBuilder
 						fromIter.remove();
 					}
 				}
-				tempList.add(a);
+				reverseMap.add(b,a);
 			}
 		}
 		return map;
@@ -207,16 +200,12 @@ public class DependencyGraphBuilder
 
 	public static List<IDependency> getGraphNew(List<IInstruction> instructions)
 	{
-		List<IDependency> dependencies = new ArrayList<IDependency>();
-		Map<Pair<IInstruction,IInstruction>, List<IDependency>> map = getAllConnectionsNew(instructions);
-		for(List<IDependency> dl : map.values())
-			dependencies.addAll(dl);
-
-		return dependencies;
+		MapList<Pair<IInstruction,IInstruction>, IDependency> map = getAllConnectionsNew(instructions);
+		return map.flatten();
 	}
 
 	/**
-	 * Return true if the second instruction is dependant on the first.
+	 * Return true if the second instruction is dependent on the first.
 	 * @param first
 	 * @param second
 	 * @return
@@ -245,22 +234,19 @@ public class DependencyGraphBuilder
 		return false;
 	}
 
-	private static Map<IInstruction,List<IDependency>> getDirDependencies(List<IInstruction>insts, boolean to)
+	private static MapList<IInstruction,IDependency> getDirDependencies(List<IInstruction>insts, boolean to)
 	{
-		Map<IInstruction,List<IDependency>> map = new HashMap<IInstruction,List<IDependency>>();
+		MapList<IInstruction,IDependency> map = new MapList<IInstruction,IDependency>();
 		List<IDependency> dependencies = getGraphNew(insts);
 		for(IDependency d : dependencies)
 		{
 			IInstruction k = to ? d.getTo() : d.getFrom();
-			if(!map.containsKey(k))
-				map.put(k, new ArrayList<IDependency>());
-			List<IDependency> deps = map.get(k);
-			deps.add(d);
+			map.add(k,d);
 		}
 		return map;
 	}
 
-	public static Map<IInstruction,List<IDependency>> getToDependencies(List<IInstruction> insts)
+	public static MapList<IInstruction,IDependency> getToDependencies(List<IInstruction> insts)
 	{
 		return getDirDependencies(insts,true);
 	}
