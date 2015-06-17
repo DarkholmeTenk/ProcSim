@@ -1,10 +1,12 @@
 package io.darkcraft.procsim.model.helper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MapList<A,B>
 {
@@ -31,6 +33,11 @@ public class MapList<A,B>
 		return list.set(index, toPut);
 	}
 
+	public List<B> put(A key, List<B> toPut)
+	{
+		return map.put(key, toPut);
+	}
+
 	public B get(A key, int index)
 	{
 		List<B> list = getList(key);
@@ -41,5 +48,34 @@ public class MapList<A,B>
 	{
 		List<B> list = getList(key);
 		return list.iterator();
+	}
+
+	public Set<A> keySet()
+	{
+		return map.keySet();
+	}
+
+	public Collection<List<B>> values()
+	{
+		return map.values();
+	}
+
+	public List<B> flatten()
+	{
+		List<B> output = new ArrayList<B>();
+		for(List<B> bList : values())
+			for(B b : bList)
+				output.add(b);
+		return output;
+	}
+
+	public boolean containsKey(A key)
+	{
+		return map.containsKey(key);
+	}
+
+	public List<B> remove(A key)
+	{
+		return map.remove(key);
 	}
 }

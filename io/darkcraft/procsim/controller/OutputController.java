@@ -1,6 +1,7 @@
 package io.darkcraft.procsim.controller;
 
 import io.darkcraft.procsim.model.dependencies.IDependency;
+import io.darkcraft.procsim.model.helper.MapList;
 import io.darkcraft.procsim.model.helper.OutputHelper;
 import io.darkcraft.procsim.model.helper.Pair;
 import io.darkcraft.procsim.model.instruction.IInstruction;
@@ -13,12 +14,9 @@ import io.darkcraft.procsim.view.drawing.ColourStore;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -29,7 +27,7 @@ public class OutputController
 	private AbstractSimulator									simulator;
 	private List<List<Pair<IInstruction, String>>>				fillData	= null;
 	private List<IInstruction>									insts		= null;
-	private Map<Pair<Integer, Integer>, List<ArrowDataStore>>	links		= new HashMap();
+	private MapList<Pair<Integer, Integer>, ArrowDataStore>		links		= new MapList();
 	private Comparator<IDependency>								depComp		= new Comparator<IDependency>()
 																			{
 																				@Override
@@ -129,7 +127,7 @@ public class OutputController
 	{
 		if (insts == null)
 			insts = simulator.getInstructions();
-		Map<IInstruction, List<IDependency>> depMap = DependencyGraphBuilder.getToDependencies(insts);
+		MapList<IInstruction, IDependency> depMap = DependencyGraphBuilder.getToDependencies(insts);
 		if (fillData == null)
 			fillData = OutputHelper.outputData(simulator);
 		int lowestY = 0;
@@ -168,22 +166,14 @@ public class OutputController
 		}
 	}
 
-	public void fillArrows(List<IInstruction> insts, Map<IInstruction, List<IDependency>> depMap, List<List<Pair<IInstruction, String>>> data, int i, int j)
+	public void fillArrows(List<IInstruction> insts, MapList<IInstruction, IDependency> depMap, List<List<Pair<IInstruction, String>>> data, int i, int j)
 	{
 		int count = 1;
 		List<Pair<IInstruction, String>> row = data.get(i);
 		IInstruction inst = row.get(0).a;
-		List<IDependency> originalDeps = depMap.get(inst);
-		if (originalDeps == null)
-			return;
-		List<IDependency> deps = originalDeps;
+		List<IDependency> deps = depMap.getList(inst);
 		Collections.sort(deps, depComp);
 		Pair pair = new Pair(j, i);
-		if (!links.containsKey(pair))
-			links.put(pair, new ArrayList());
-		else
-			return;
-		List<ArrowDataStore> arrows = links.get(pair);
 		depLoop: for (IDependency d : deps)
 		{
 			if (!toFill.importantDependencyType[d.getType().ordinal()])
@@ -211,7 +201,7 @@ public class OutputController
 				}
 				if (finishTime == -1)
 					continue depLoop;
-				arrows.add(new ArrowDataStore(finishTime, rowNum, j, i, d, count, 1));
+				links.add(pair,new ArrowDataStore(finishTime, rowNum, j, i, d, count, 1));
 			}
 		}
 	}
@@ -225,7 +215,7 @@ public class OutputController
 			{
 				if (i.a > toFill.stateNum)
 					continue;
-				List<ArrowDataStore> arrows = links.get(i);
+				List<ArrowDataStore> arrows = links.getList(i);
 				int count = 1;
 				for (ArrowDataStore arrow : arrows)
 				{
@@ -244,7 +234,7 @@ public class OutputController
 
 			for (Pair<Integer, Integer> i : links.keySet())
 			{
-				List<ArrowDataStore> arrows = links.get(i);
+				List<ArrowDataStore> arrows = links.getList(i);
 				int count = 1;
 				for (ArrowDataStore arrow : arrows)
 				{
