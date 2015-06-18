@@ -3,6 +3,11 @@ package io.darkcraft.procsim.model.dependencies;
 import io.darkcraft.procsim.controller.DependencyType;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 
+/**
+ * A Read After Write dependency.
+ * @author Shane Booth
+ *
+ */
 public class RAW extends AbstractDependency
 {
 	public RAW(IInstruction _from, IInstruction _to)

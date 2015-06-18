@@ -3,6 +3,11 @@ package io.darkcraft.procsim.model.dependencies;
 import io.darkcraft.procsim.controller.DependencyType;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 
+/**
+ * A Write After Read dependency
+ * @author Shane Booth
+ *
+ */
 public class WAR extends AbstractDependency
 {
 

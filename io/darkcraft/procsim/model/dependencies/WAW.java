@@ -3,6 +3,11 @@ package io.darkcraft.procsim.model.dependencies;
 import io.darkcraft.procsim.controller.DependencyType;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 
+/**
+ * A Write After Write dependency.
+ * @author mbax2sb4
+ *
+ */
 public class WAW extends AbstractDependency
 {
 	public WAW(IInstruction _from, IInstruction _to)

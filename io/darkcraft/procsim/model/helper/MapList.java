@@ -78,4 +78,9 @@ public class MapList<A,B>
 	{
 		return map.remove(key);
 	}
+
+	public int size(A key)
+	{
+		return getList(key).size();
+	}
 }

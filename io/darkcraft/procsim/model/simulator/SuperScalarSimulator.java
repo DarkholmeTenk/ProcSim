@@ -3,6 +3,7 @@ package io.darkcraft.procsim.model.simulator;
 import io.darkcraft.procsim.model.components.abstracts.AbstractPipeline;
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.components.abstracts.IRegisterBank;
+import io.darkcraft.procsim.model.helper.MiscFunctions;
 import io.darkcraft.procsim.model.helper.PipelineComparator;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
@@ -41,16 +42,30 @@ public class SuperScalarSimulator extends InOrderSimulator
 		for(AbstractPipeline pl : pipeline)
 			if(!pl.isEmpty())
 				allEmpty = false;
-		for(int i = pipeline[0].getPipelineStages().length -1; i>= 0; i--)
+		int length = pipeline[0].getPipelineStages().length;
+		int[][] exeBlocks = pipeline[0].getExeBlocks();
+		int max = MiscFunctions.max(exeBlocks);
+		int min = MiscFunctions.min(exeBlocks);
+		for(int stage = length -1; stage> max; stage--)
 		{
-			Arrays.sort(pipeline, comparator[i]);
-			mainPipeline:
+			Arrays.sort(pipeline, comparator[stage]);
 			for(AbstractPipeline p : pipeline)
 			{
-				p.stepStage(this, i);
-				if(p.getInstruction(i) != null) break;
+				p.stepStage(this, stage);
+				if(p.getInstruction(stage) != null) break;
 			}
 		}
+		stepUnsafe(exeBlocks);
+		for(int stage = min - 1; stage >= 0; stage--)
+		{
+			Arrays.sort(pipeline, comparator[stage]);
+			for(AbstractPipeline p : pipeline)
+			{
+				p.stepStage(this, stage);
+				if(p.getInstruction(stage) != null) break;
+			}
+		}
+
 		return !allEmpty;
 	}
 
@@ -58,16 +73,6 @@ public class SuperScalarSimulator extends InOrderSimulator
 	{
 		if(i != null)
 		{
-			/*for(AbstractPipeline p : pipeline)
-			{
-				List<String> dangerous = p.getDangerousOut();
-				String[] input = i.getInputRegisters();
-				if(input != null)
-					for(String s : input)
-						if(s != null && dangerous.contains(s)) return i;
-				dangerous = p.getDangerousIn();
-				if(i.getOutputRegister() != null && dangerous.contains(i.getOutputRegister())) return i;
-			}*/
 			for(AbstractPipeline p : pipeline)
 			{
 				if(p.addInstruction(i))

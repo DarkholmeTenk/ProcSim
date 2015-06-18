@@ -14,12 +14,9 @@ import io.darkcraft.procsim.view.drawing.ColourStore;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -171,6 +168,7 @@ public class OutputController
 		List<IDependency> deps = depMap.getList(inst);
 		Collections.sort(deps, depComp);
 		Pair pair = new Pair(j, i);
+		if(links.size(pair) > 0) return;
 		depLoop: for (IDependency d : deps)
 		{
 			if (!toFill.importantDependencyType[d.getType().ordinal()])
@@ -205,6 +203,8 @@ public class OutputController
 
 	public void addArrowsToSurface()
 	{
+		for(String r : registerLabelMap.keySet())
+			color(r,fg);
 		toFill.surface.clear();
 		if (toFill.dependencyDisplay == 1)
 		{
@@ -221,14 +221,15 @@ public class OutputController
 					double y1 = (arrow.startY + 1) * (OutputUI.preferredSize.getHeight() + 4) - 8;
 					double x2 = (arrow.endX - 1) * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth()) + 3;
 					double y2 = arrow.endY * (OutputUI.preferredSize.getHeight() + 4) + 3 + yO;
-					Color c = ColourStore.getColor(arrow.dep.getDependentRegister());
+					String depReg = arrow.dep.getDependentRegister();
+					Color c = ColourStore.getColor(depReg);
+					color(depReg,c);
 					toFill.surface.addArrow(x1, y1, x2, y2, c, arrow.dep.getType());
 				}
 			}
 		}
 		else if (toFill.dependencyDisplay == 2)
 		{
-
 			for (Pair<Integer, Integer> i : links.keySet())
 			{
 				List<ArrowDataStore> arrows = links.getList(i);
@@ -261,7 +262,9 @@ public class OutputController
 					double y1 = (sY + 1) * (OutputUI.preferredSize.getHeight() + 4) - 8;
 					double x2 = (eX - 1) * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth()) + 3;
 					double y2 = eY * (OutputUI.preferredSize.getHeight() + 4) + 3 + yO;
-					Color c = ColourStore.getColor(arrow.dep.getDependentRegister());
+					String depReg = arrow.dep.getDependentRegister();
+					Color c = ColourStore.getColor(depReg);
+					color(depReg,c);
 					toFill.surface.addStar(x1, y1, x2, y2, c, arrow.dep.getType());
 				}
 			}

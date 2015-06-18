@@ -55,14 +55,14 @@ public class OutputHelper
 		return outputData(sim, sim.getStateNames(), sim.getMap(), sim.getInstructions());
 	}
 
-	private static int exeIndex(String[] stateNames)
+	private static int idIndex(String[] stateNames)
 	{
 		for(int i = 0; i < stateNames.length; i++)
 		{
-			if(stateNames.equals("EXE"))
+			if(stateNames.equals("ID"))
 				return i;
 		}
-		return 2;
+		return 1;
 	}
 
 	public static List<List<Pair<IInstruction,String>>> outputData(AbstractSimulator sim, String[][] stateNames, List<IInstruction[][]> states, List<IInstruction> instructions)
@@ -151,11 +151,11 @@ public class OutputHelper
 						boolean stall = index == prevIndex;
 						if(instruction.didLeaveEarly())
 							rd.add(new Pair(instruction,";" + stateNames[pipeline][index]));
-						else if(instruction.didFail() && index >= exeIndex(stateNames[pipeline]))
+						else if(instruction.didFail() && index > idIndex(stateNames[pipeline]))
 							rd.add(new Pair(instruction,"*" + stateNames[pipeline][index]));
 						else if(stall)
 							rd.add(new Pair(instruction,"@" + stateNames[pipeline][index]));
-						else if(!stall && wasStalled && index == (1+sim.getLastIDStage(pipeline)))
+						else if(!stall && wasStalled && sim.isExeStage(pipeline,index))
 							rd.add(new Pair(instruction,"?" + stateNames[pipeline][index]));
 						else
 							rd.add(new Pair(instruction, stateNames[pipeline][index]));

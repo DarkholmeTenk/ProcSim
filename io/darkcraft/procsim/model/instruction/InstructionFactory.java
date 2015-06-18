@@ -7,6 +7,7 @@ import io.darkcraft.procsim.model.instruction.instructions.BranchLink;
 import io.darkcraft.procsim.model.instruction.instructions.Compare;
 import io.darkcraft.procsim.model.instruction.instructions.Load;
 import io.darkcraft.procsim.model.instruction.instructions.Move;
+import io.darkcraft.procsim.model.instruction.instructions.Mul;
 import io.darkcraft.procsim.model.instruction.instructions.Nop;
 import io.darkcraft.procsim.model.instruction.instructions.Store;
 import io.darkcraft.procsim.model.instruction.instructions.Sub;
@@ -33,6 +34,8 @@ public class InstructionFactory
 			return Sub.create(c,id,data[1]);
 		if(data[0].startsWith("MOV"))
 			return Move.create(c,id,data[1]);
+		if(data[0].startsWith("MUL"))
+			return Mul.create(c, id, data[1]);
 		if(data[0].startsWith("CMP"))
 			return Compare.create(c,id,data[1]);
 		if(data[0].startsWith("BL"))

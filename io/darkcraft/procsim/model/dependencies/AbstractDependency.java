@@ -2,6 +2,11 @@ package io.darkcraft.procsim.model.dependencies;
 
 import io.darkcraft.procsim.model.instruction.IInstruction;
 
+/**
+ * A class to provide some functionality universal to all of the dependencies I implemented
+ * @author Shane Booth
+ *
+ */
 public abstract class AbstractDependency implements IDependency
 {
 	public final IInstruction from;
