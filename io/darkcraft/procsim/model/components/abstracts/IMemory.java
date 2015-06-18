@@ -4,6 +4,11 @@ import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 
 import java.io.File;
 
+/**
+ * An interface to represent the connections to memory
+ * @author Shane Booth
+ *
+ */
 public interface IMemory
 {
 	/**
@@ -22,7 +27,7 @@ public interface IMemory
 	public int getValue(Object i, int location);
 
 	/**
-	 * sets the value in location
+	 * sets the value in location and adds the requesting object to the list of memory operations to be processed
 	 */
 	public void setValue(Object i, int location, int value);
 
@@ -44,11 +49,26 @@ public interface IMemory
 	 */
 	public void step(AbstractSimulator sim);
 
+	/**
+	 * Read all the memory information from the file
+	 */
 	public void read();
 
+	/**
+	 * Sets the file which represents the memory to newFile
+	 * @param newFile the new file which represents the memory
+	 */
 	public void setFile(File newFile);
 
+	/**
+	 * Return a new object which represents the same thing as the current memory.
+	 * If this is a cache object, the next level up should be cloned as well.
+	 * @return
+	 */
 	public IMemory clone();
 
+	/**
+	 * @return an array of all of the memory which is connected to this memory (and this memory).
+	 */
 	public IMemory[] getStack();
 }
