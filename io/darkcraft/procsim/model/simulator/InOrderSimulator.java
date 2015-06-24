@@ -7,18 +7,15 @@ import io.darkcraft.procsim.model.helper.MiscFunctions;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
 
-import java.util.ArrayList;
-
 public class InOrderSimulator extends AbstractSimulator
 {
 	IInstruction next = null;
-	ArrayList<IInstruction[][]> stateTimeline;
+
 
 	public InOrderSimulator(IMemory _mem, IRegisterBank _reg, AbstractPipeline[] _pipeline, InstructionReader _reader)
 	{
 		super(_mem, _reg, _pipeline, _reader);
 		reader.open();
-		stateTimeline = new ArrayList<IInstruction[][]>();
 	}
 
 	public InOrderSimulator(IMemory _mem, IRegisterBank _reg, InstructionReader _reader, AbstractPipeline... pipes)
@@ -30,19 +27,13 @@ public class InOrderSimulator extends AbstractSimulator
 	{
 		super(_mem, _reg, new AbstractPipeline[]{_pipeline}, _reader);
 		reader.open();
-		stateTimeline = new ArrayList<IInstruction[][]>();
-	}
-
-	private IInstruction[][] getState()
-	{
-		return new IInstruction[][] {pipeline[0].getState()};
 	}
 
 	protected boolean stepPipelines()
 	{
 		if(!pipeline[0].isEmpty())
 		{
-			stateTimeline.add(getState());
+			addStage();
 			AbstractPipeline pl = pipeline[0];
 			int length = pl.getPipelineStages().length;
 			int[][] exeBlocks = pl.getExeBlocks();
@@ -87,12 +78,6 @@ public class InOrderSimulator extends AbstractSimulator
 			return false;
 		}
 		return true;
-	}
-
-	@Override
-	public ArrayList<IInstruction[][]> getMap()
-	{
-		return stateTimeline;
 	}
 
 	@Override

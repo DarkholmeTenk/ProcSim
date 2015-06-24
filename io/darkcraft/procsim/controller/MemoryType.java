@@ -50,4 +50,43 @@ public enum MemoryType
 	{
 		return name;
 	}
+
+	public static MemoryType getMT(IMemory m)
+	{
+		if(m instanceof StandardMemory) return STANDARD;
+		if(m instanceof DMCache) return DMC;
+		return null;
+	}
+
+	public static String getString(IMemory m)
+	{
+		if(m == null) return "";
+		MemoryType t = getMT(m);
+		if(m instanceof AbstractCache)
+		{
+			AbstractCache c = (AbstractCache)m;
+			return t.name +","+c.cacheLineSize+","+c.size+ ","+c.cacheLevel +"|"+ getString(c.nextLevel);
+		}
+		return t.name + "," + m.getWordSize()+ "," + m.getSize();
+	}
+
+	private static int toInt(String s)
+	{
+		return Integer.parseInt(s);
+	}
+
+	public static IMemory getMem(String s, File f)
+	{
+		IMemory m = null;
+		String[] memData = s.split("\\|");
+		for(int i = memData.length-1; i>= 0; i--)
+		{
+			String[] data = memData[i].split(",");
+			MemoryType t = get(data[0]);
+			m = t.getMemory(toInt(data[2]),toInt(data[1]),m,f);
+			if(m instanceof AbstractCache)
+				((AbstractCache) m).setLevel(toInt(data[3]));
+		}
+		return m;
+	}
 }

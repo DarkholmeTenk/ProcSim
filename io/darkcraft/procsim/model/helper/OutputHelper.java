@@ -1,5 +1,6 @@
 package io.darkcraft.procsim.model.helper;
 
+import io.darkcraft.procsim.controller.DataHelper;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 
@@ -9,23 +10,6 @@ import java.util.List;
 
 public class OutputHelper
 {
-	private static boolean equal(IInstruction[][] a, IInstruction[][] b)
-	{
-		if(a.length != b.length) return false;
-		for(int i = 0; i < a.length; i++)
-		{
-			if(a[i].length != b[i].length) return false;
-			for(int j = 0; j < a[i].length; j++)
-			{
-				if((a[i][j] == null) ^ (b[i][j] == null)) return false;
-				if(a[i][j] == null) continue;
-				if(!a[i][j].equals(b[i][j]))
-					return false;
-			}
-		}
-		return true;
-	}
-
 	public static void output(AbstractSimulator sim)
 	{
 		output(sim, sim.getStateNames(), sim.getMap(), sim.getInstructions());
@@ -75,19 +59,20 @@ public class OutputHelper
 
 		int row = 0;
 		data.get(0).add(new Pair(null,""));
-		HashSet<Integer> disabledStates = new HashSet<Integer>();
+		/*HashSet<Integer> disabledStates = new HashSet<Integer>();
 		int sameCounter = 0;
 		for(int i = 0; i < states.size() - 1; i++)
 		{
 			IInstruction[][] state = states.get(i);
 			//if(state.equals(states.get(i+1)))
-			if(equal(state,states.get(i+1)))
+			if(DataHelper.equal(state,states.get(i+1)))
 				sameCounter++;
 			else
 				sameCounter = 0;
 			if(sameCounter > 1)
 				disabledStates.add(i);
-		}
+		}*/
+		HashSet<Integer> disabledStates = DataHelper.getDuplicateStates(states);
 
 		boolean printedMissing = false;
 		for(int count = 0; count < states.size(); count++)

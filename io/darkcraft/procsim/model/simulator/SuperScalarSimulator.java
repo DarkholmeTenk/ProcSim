@@ -7,7 +7,6 @@ import io.darkcraft.procsim.model.helper.MiscFunctions;
 import io.darkcraft.procsim.model.helper.PipelineComparator;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
-import io.darkcraft.procsim.model.instruction.instructions.Branch;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -26,19 +25,11 @@ public class SuperScalarSimulator extends InOrderSimulator
 			comparator[i] = new PipelineComparator(i);
 	}
 
-	private IInstruction[][] getState()
-	{
-		IInstruction[][] states = new IInstruction[pipeline.length][];
-		for(int i = 0; i < states.length; i++)
-			states[i] = pipeline[i].getState();
-		return states;
-	}
-
 	@Override
 	protected boolean stepPipelines()
 	{
 		boolean allEmpty = true;
-		stateTimeline.add(getState());
+		addStage();
 		for(AbstractPipeline pl : pipeline)
 			if(!pl.isEmpty())
 				allEmpty = false;
@@ -123,8 +114,8 @@ public class SuperScalarSimulator extends InOrderSimulator
 		{
 			IInstruction in = nexts[i];
 			if(in == null) break;
-			if(in instanceof Branch && i != 0)
-				break;
+			//if(in instanceof Branch && i != 0)
+			//	break;
 			nexts[i] = assign(in);
 			if(nexts[i] != null) break;
 		}

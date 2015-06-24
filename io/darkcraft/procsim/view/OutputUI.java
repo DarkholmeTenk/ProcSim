@@ -33,16 +33,19 @@ public class OutputUI implements ActionListener
 	private JButton				toggleArrowsButton;
 	private JButton				stateLeftButton;
 	private JButton				stateRightButton;
+	private JButton				pipelineViewButton;
 	private JLayeredPane		layered;
 	// 1 = arrows, 2 = stars, 0 = none
 	public int					dependencyDisplay	= 1;
+	private PipelineViewUI		plvui				= null;
 
 	public int					stateNum			= 0;
 	private int					maxStateNum			= 1;
 	public boolean[]			importantDependencyType;
 	public OutputController		controller;
 
-	private static final Color bg = Color.WHITE;
+	private static final Color	bg					= Color.WHITE;
+
 	public OutputUI(AbstractSimulator _sim)
 	{
 		controller = new OutputController(this, _sim);
@@ -50,7 +53,7 @@ public class OutputUI implements ActionListener
 		for (DependencyType dt : DependencyType.values())
 			importantDependencyType[dt.ordinal()] = _sim.isImportant(dt);
 		mainFrame = new JFrame();
-		mainFrame.setTitle("ProcSim Output");
+		mainFrame.setTitle("ProcSim - Space Time Graph");
 		mainContainer = new JPanel();
 		mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.LINE_AXIS));
 		mainFrame.setLayout(GridBagHelper.getLayout());
@@ -117,6 +120,9 @@ public class OutputUI implements ActionListener
 		stateRightButton = new JButton(">");
 		stateRightButton.addActionListener(this);
 		mainFrame.add(stateRightButton, GridBagHelper.getConstraints(8, 11, 1, 1));
+		pipelineViewButton = new JButton("Pipeline view");
+		pipelineViewButton.addActionListener(this);
+		mainFrame.add(pipelineViewButton, GridBagHelper.getConstraints(6, 11));
 	}
 
 	private void runSim()
@@ -124,7 +130,7 @@ public class OutputUI implements ActionListener
 		int timer = 0;
 		while (sim.step())
 		{
-			if (timer++ > 50000)
+			if (timer++ > 10000)
 				break;
 		}
 	}
@@ -162,6 +168,11 @@ public class OutputUI implements ActionListener
 			surface.setVisible(true);
 			dataPanel.revalidate();
 			layered.revalidate();
+		}
+		if (source == pipelineViewButton)
+		{
+			if(plvui == null || !plvui.isVisible())
+				plvui = new PipelineViewUI(sim);
 		}
 	}
 

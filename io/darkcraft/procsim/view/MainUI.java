@@ -72,6 +72,8 @@ public class MainUI implements ActionListener
 				writer.println("ISF:" + instructionSelectField.getText());
 			if (!memorySelectField.getText().isEmpty())
 				writer.println("MSF:" + memorySelectField.getText());
+			if (currentMemory != null)
+				writer.println("MEM:" + MemoryType.getString(currentMemory));
 		}
 		catch (IOException e)
 		{
@@ -97,6 +99,11 @@ public class MainUI implements ActionListener
 					instructionSelectField.setText(split[1]);
 				if (split[0].equals("MSF"))
 					memorySelectField.setText(split[1]);
+				if (split[0].equals("MEM"))
+				{
+					currentMemory = MemoryType.getMem(split[1], new File(memorySelectField.getText()));
+					updateMemoryList();
+				}
 			}
 		}
 		catch (IOException e)
@@ -325,6 +332,7 @@ public class MainUI implements ActionListener
 		}
 		currentMemory = type.getMemory(getInt(memorySizeField), getInt(cacheLineSizeField), currentMemory, new File(memorySelectField.getText()));
 		updateMemoryList();
+		save();
 	}
 
 	private void run()

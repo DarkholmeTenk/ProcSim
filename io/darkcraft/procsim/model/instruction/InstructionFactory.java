@@ -14,6 +14,14 @@ import io.darkcraft.procsim.model.instruction.instructions.Sub;
 
 public class InstructionFactory
 {
+	private static String strip(String in, Conditional con)
+	{
+		String suffix = con.getName();
+		if(in.endsWith(suffix))
+			return in.substring(0, in.length()-suffix.length());
+		return in;
+	}
+
 	public static IInstruction get(String line, int id)
 	{
 		line = line.trim();
@@ -24,6 +32,7 @@ public class InstructionFactory
 		String[] data = line.split(ReadingHelper.splitRegex,2);
 		data[0] = data[0].toUpperCase();
 		Conditional c = Conditional.get(data[0]);
+		data[0] = strip(data[0],c);
 		if(data[0].startsWith("LDR"))
 			return Load.create(c,id,data[1]);
 		if(data[0].startsWith("STR"))

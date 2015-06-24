@@ -23,17 +23,20 @@ import javax.swing.SwingConstants;
 
 public class OutputController
 {
-	private OutputUI											toFill;
-	private AbstractSimulator									simulator;
-	private List<List<Pair<IInstruction, String>>>				fillData	= null;
-	private List<IInstruction>									insts		= null;
-	private MapList<Pair<Integer, Integer>, ArrowDataStore>		links		= new MapList();
-	private Comparator<IDependency>								depComp		= new DependencyComparator();
-	private MapList<String,JLabel>								registerLabelMap = new MapList();
+	private OutputUI										toFill;
+	private AbstractSimulator								simulator;
+	private List<List<Pair<IInstruction, String>>>			fillData			= null;
+	private List<IInstruction>								insts				= null;
+	private MapList<Pair<Integer, Integer>, ArrowDataStore>	links				= new MapList();
+	private Comparator<IDependency>							depComp				= new DependencyComparator();
+	private MapList<String, JLabel>							registerLabelMap	= new MapList();
 
-	private static final Color bgColor1 = Color.getHSBColor(0, 0, 0.9f);
-	private static final Color bgColor2 = Color.LIGHT_GRAY;
-	private static final Color fg = Color.BLACK;
+	private static final Color								bgColor1			= Color.getHSBColor(0, 0, 0.9f);
+	private static final Color								bgColor2			= Color.LIGHT_GRAY;
+	private static final Color								fg					= Color.BLACK;
+	public static final Color								failedColor			= Color.RED;
+	public static final Color								blankedColor		= Color.BLUE;
+	public static final Color								stalledColor		= Color.getHSBColor(0.8f, 1, 1);
 
 	public OutputController(OutputUI parent, AbstractSimulator sim)
 	{
@@ -57,10 +60,10 @@ public class OutputController
 
 	public void addText(String str, int i, int j)
 	{
-		boolean green = str.startsWith(";");
-		boolean red = str.startsWith("*");
-		boolean purp = str.startsWith("@");
-		//str = str.replace("#", "").replace("*", "").replace("@", "").replaceAll("(#|*|@|\\?)", "");
+		boolean removed = str.startsWith(";");
+		boolean failed = str.startsWith("*");
+		boolean stalled = str.startsWith("@");
+		// str = str.replace("#", "").replace("*", "").replace("@", "").replaceAll("(#|*|@|\\?)", "");
 		str = str.replaceAll("(\\;|\\*|@|\\?)", "");
 		JLabel label = new JLabel(str);
 		label.setForeground(fg);
@@ -72,12 +75,12 @@ public class OutputController
 		if (!str.isEmpty())
 			label.setOpaque(true);
 		label.setFont(Font.getFont(Font.SANS_SERIF));
-		if (green)
-			label.setForeground(Color.BLUE);
-		if (red)
-			label.setForeground(Color.RED);
-		if (purp)
-			label.setForeground(Color.getHSBColor(0.8f, 1, 1));
+		if (removed)
+			label.setForeground(blankedColor);
+		if (failed)
+			label.setForeground(failedColor);
+		if (stalled)
+			label.setForeground(stalledColor);
 		if (i % 2 == 0)
 			label.setBackground(bgColor1);
 		else
@@ -87,8 +90,8 @@ public class OutputController
 		else
 		{
 			String[] data = str.split(" ");
-			if(data.length > 1)
-				for(int x = 0; x < data.length; x++)
+			if (data.length > 1)
+				for (int x = 0; x < data.length; x++)
 				{
 					String temp = data[x];
 					label = new JLabel(temp);
@@ -97,13 +100,13 @@ public class OutputController
 						label.setBackground(bgColor1);
 					else
 						label.setBackground(bgColor2);
-					if(x > 1)
+					if (x > 1)
 					{
-						if(!temp.startsWith("#"))
+						if (!temp.startsWith("#"))
 							registerLabelMap.add(temp, label);
 					}
 					label.setOpaque(true);
-					toFill.instructionPanel.add(label, GridBagHelper.getConstraints(x,i));
+					toFill.instructionPanel.add(label, GridBagHelper.getConstraints(x, i));
 				}
 			else
 				toFill.instructionPanel.add(label, GridBagHelper.getConstraints(j, i, 4, 1));
@@ -112,11 +115,12 @@ public class OutputController
 
 	private void color(String register, Color c)
 	{
-		for(JLabel l : registerLabelMap.getList(register))
+		for (JLabel l : registerLabelMap.getList(register))
 			l.setForeground(c);
 	}
 
-	private Dimension minimal = new Dimension(0,0);
+	private Dimension	minimal	= new Dimension(0, 0);
+
 	public void fillResults(int upTo)
 	{
 		if (insts == null)
@@ -168,7 +172,8 @@ public class OutputController
 		List<IDependency> deps = depMap.getList(inst);
 		Collections.sort(deps, depComp);
 		Pair pair = new Pair(j, i);
-		if(links.size(pair) > 0) return;
+		if (links.size(pair) > 0)
+			return;
 		depLoop: for (IDependency d : deps)
 		{
 			if (!toFill.importantDependencyType[d.getType().ordinal()])
@@ -196,15 +201,15 @@ public class OutputController
 				}
 				if (finishTime == -1)
 					continue depLoop;
-				links.add(pair,new ArrowDataStore(finishTime, rowNum, j, i, d, count, 1));
+				links.add(pair, new ArrowDataStore(finishTime, rowNum, j, i, d, count, 1));
 			}
 		}
 	}
 
 	public void addArrowsToSurface()
 	{
-		for(String r : registerLabelMap.keySet())
-			color(r,fg);
+		for (String r : registerLabelMap.keySet())
+			color(r, fg);
 		toFill.surface.clear();
 		if (toFill.dependencyDisplay == 1)
 		{
@@ -223,7 +228,7 @@ public class OutputController
 					double y2 = arrow.endY * (OutputUI.preferredSize.getHeight() + 4) + 3 + yO;
 					String depReg = arrow.dep.getDependentRegister();
 					Color c = ColourStore.getColor(depReg);
-					color(depReg,c);
+					color(depReg, c);
 					toFill.surface.addArrow(x1, y1, x2, y2, c, arrow.dep.getType());
 				}
 			}
@@ -240,16 +245,17 @@ public class OutputController
 					int sY = arrow.startY;
 					int eX = arrow.endX;
 					int eY = arrow.endY;
-					if(eX > toFill.stateNum)
+					if (eX > toFill.stateNum)
 					{
-						if(toFill.stateNum <= 1) continue;
-						String desiredState = fillData.get(eY).get(eX-1).b;
+						if (toFill.stateNum <= 1)
+							continue;
+						String desiredState = fillData.get(eY).get(eX - 1).b;
 						String currentState = fillData.get(eY).get(toFill.stateNum).b;
-						if(!desiredState.equals(currentState))
+						if (!desiredState.equals(currentState))
 						{
-							if(currentState.equals("..."))
+							if (currentState.equals("..."))
 							{
-								if(!desiredState.equals(fillData.get(eY).get(toFill.stateNum-1).b))
+								if (!desiredState.equals(fillData.get(eY).get(toFill.stateNum - 1).b))
 									continue;
 							}
 							else
@@ -264,7 +270,7 @@ public class OutputController
 					double y2 = eY * (OutputUI.preferredSize.getHeight() + 4) + 3 + yO;
 					String depReg = arrow.dep.getDependentRegister();
 					Color c = ColourStore.getColor(depReg);
-					color(depReg,c);
+					color(depReg, c);
 					toFill.surface.addStar(x1, y1, x2, y2, c, arrow.dep.getType());
 				}
 			}

@@ -47,7 +47,7 @@ public class GridBagHelper
 		return c;
 	}
 
-	public static Object getConstraints(int x, int y, int sx, int sy, int anchor)
+	public static GridBagConstraints getConstraints(int x, int y, int sx, int sy, int anchor)
 	{
 		GridBagConstraints c = getConstraints(x,y,sx,sy);
 		c.anchor=anchor;

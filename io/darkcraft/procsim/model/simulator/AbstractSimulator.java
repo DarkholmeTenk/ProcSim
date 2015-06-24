@@ -16,7 +16,9 @@ public abstract class AbstractSimulator
 	protected final IMemory				mem;
 	protected final IRegisterBank		reg;
 	protected final AbstractPipeline[]	pipeline;
+	protected final AbstractPipeline[]	pipelineUnchanged;
 	protected final InstructionReader	reader;
+	private final ArrayList<IInstruction[][]> stateTimeline;
 
 	/**
 	 * Instantiates the important variables in an abstract simulator.
@@ -38,7 +40,17 @@ public abstract class AbstractSimulator
 			_pipeline = newPipelines;
 		}
 		pipeline = _pipeline;
+		pipelineUnchanged = pipeline.clone();
 		reader = _reader;
+		stateTimeline = new ArrayList<IInstruction[][]>();
+	}
+
+	protected void addStage()
+	{
+		IInstruction[][] states = new IInstruction[pipeline.length][];
+		for(int i = 0; i < states.length; i++)
+			states[i] = pipelineUnchanged[i].getState();
+		stateTimeline.add(states);
 	}
 
 	/**
@@ -110,7 +122,10 @@ public abstract class AbstractSimulator
 	/**
 	 * @return an array list with each entry representing the state of the pipeline at that time
 	 */
-	public abstract ArrayList<IInstruction[][]> getMap();
+	public ArrayList<IInstruction[][]> getMap()
+	{
+		return stateTimeline;
+	}
 
 	/**
 	 * Clears every instruction in all of the pipelines which comes after step i
