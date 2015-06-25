@@ -1,5 +1,6 @@
 package io.darkcraft.procsim.model.components.memory.cache;
 
+import io.darkcraft.procsim.controller.MemoryState;
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.instruction.IMemoryInstruction;
 import io.darkcraft.procsim.model.instruction.MemoryInstructionType;
@@ -87,6 +88,8 @@ public class DMCache extends AbstractCache
 	@Override
 	public int getValue(Object i, int location)
 	{
+		if(i != null)
+			reads++;
 		CacheEntry ent = getCell(location);
 		inTimes.put(i, timer);
 		inLocs.put(i, location);
@@ -96,6 +99,8 @@ public class DMCache extends AbstractCache
 	@Override
 	public void setValue(Object i, int location, int value)
 	{
+		if(i != null)
+			writes++;
 		CacheEntry ent = getCell(location);
 		inTimes.put(i, timer);
 		inLocs.put(i, location);
@@ -161,5 +166,11 @@ public class DMCache extends AbstractCache
 			return new DMCache(size,cacheLineSize,((AbstractCache)nextLevel).cloneUp(toReplace,newOne),cacheLevel);
 		else
 			return new DMCache(size,cacheLineSize,nextLevel.clone(),cacheLevel);
+	}
+
+	@Override
+	public MemoryState getState()
+	{
+		return new MemoryState(this,reads,writes,conflicts,misses,nextLevel.getState());
 	}
 }

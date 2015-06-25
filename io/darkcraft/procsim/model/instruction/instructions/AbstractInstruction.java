@@ -17,7 +17,13 @@ public abstract class AbstractInstruction implements IInstruction
 	public AbstractInstruction(Conditional _c, int _address)
 	{
 		c = _c;
-		id = _address;
+		id = _address << 2;
+	}
+
+	@Override
+	public int getAddress()
+	{
+		return id;
 	}
 
 	@Override
@@ -76,7 +82,7 @@ public abstract class AbstractInstruction implements IInstruction
 
 	protected String getID()
 	{
-		return String.format("[%03d] ", id << 2);
+		return String.format("[%03d] ", id);
 	}
 
 	@Override

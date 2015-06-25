@@ -58,6 +58,8 @@ public interface IInstruction
 	 */
 	public boolean hasStarted();
 
+	public int getAddress();
+
 	/**
 	 * Should be run by the simulator when the instruction first enters the pipeline
 	 */

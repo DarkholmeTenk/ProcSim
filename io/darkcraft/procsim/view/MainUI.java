@@ -35,7 +35,7 @@ import javax.swing.JTextField;
 public class MainUI implements ActionListener
 {
 	public static MainUI	i;
-	private JFrame			mainFrame;
+	protected final JFrame	mainFrame;
 	private JButton			instructionSelectButton;
 	private JTextField		instructionSelectField;
 	private JButton			memorySelectButton;
@@ -52,13 +52,39 @@ public class MainUI implements ActionListener
 	private JButton			removeButton;
 	private JComboBox		pipelineTypeBox;
 	private JComboBox		registerTypeBox;
+	private boolean 		inited = false;
 
 	public static void main(String... args)
 	{
-		i = new MainUI();
+		String f = null;
+		boolean quiet = false;
+		for (String s : args)
+		{
+			String[] data = s.split("=", 2);
+			if (data[0].equals("-c") || data[0].equals("--config"))
+				f = data[1];
+			if (data[0].equals("-q") || data[0].equals("--quiet"))
+				quiet = true;
+		}
+		if(f == null)
+			i = new MainUI(quiet);
+		else
+			i = new MainUI(quiet,new File(f));
+		for (String s : args)
+		{
+			String[] data = s.split("=", 2);
+			if (data[0].equals("-i") || data[0].equals("--instructions"))
+				i.instructionSelectField.setText(data[1]);
+			if (data[0].equals("-m") || data[0].equals("--memoryfile"))
+				i.memorySelectField.setText(data[1]);
+			if (data[0].equals("-M") || data[0].equals("--memory"))
+				i.setMemory(data[1]);
+		}
+		if(quiet)
+			i.run();
 	}
 
-	private static final File	f	= new File("config.cfg");
+	private final File	f;
 
 	private void save()
 	{
@@ -74,6 +100,10 @@ public class MainUI implements ActionListener
 				writer.println("MSF:" + memorySelectField.getText());
 			if (currentMemory != null)
 				writer.println("MEM:" + MemoryType.getString(currentMemory));
+			writer.println("PLT:" + pipelineTypeBox.getSelectedItem().toString());
+			writer.println("SIM:" + simulatorTypeBox.getSelectedItem().toString());
+			writer.println("REG:" + registerTypeBox.getSelectedItem().toString());
+			writer.println("NPL:" + numPipelines.getText());
 		}
 		catch (IOException e)
 		{
@@ -83,6 +113,12 @@ public class MainUI implements ActionListener
 			if (writer != null)
 				writer.close();
 		}
+	}
+
+	private void setMemory(String s)
+	{
+		currentMemory = MemoryType.getMem(s, new File(memorySelectField.getText()));
+		updateMemoryList();
 	}
 
 	private void load()
@@ -100,10 +136,15 @@ public class MainUI implements ActionListener
 				if (split[0].equals("MSF"))
 					memorySelectField.setText(split[1]);
 				if (split[0].equals("MEM"))
-				{
-					currentMemory = MemoryType.getMem(split[1], new File(memorySelectField.getText()));
-					updateMemoryList();
-				}
+					setMemory(split[1]);
+				if (split[0].equals("PLT"))
+					pipelineTypeBox.setSelectedItem(PipelineType.get(split[1]));
+				if (split[0].equals("SIM"))
+					simulatorTypeBox.setSelectedItem(SimulatorType.get(split[1]));
+				if (split[0].equals("REG"))
+					registerTypeBox.setSelectedItem(RegisterType.get(split[1]));
+				if (split[0].equals("NPL"))
+					numPipelines.setText(split[1]);
 			}
 		}
 		catch (IOException e)
@@ -122,8 +163,14 @@ public class MainUI implements ActionListener
 		}
 	}
 
-	public MainUI()
+	public MainUI(boolean quiet)
 	{
+		this(quiet,new File("config.cfg"));
+	}
+
+	public MainUI(boolean quiet,File configFile)
+	{
+		f = configFile;
 		KeyboardListener.isShiftDown();
 		mainFrame = new JFrame();
 		mainFrame.setLayout(GridBagHelper.getLayout());
@@ -133,12 +180,18 @@ public class MainUI implements ActionListener
 		registerText();
 		registerButtons();
 		registerCombos();
-		mainFrame.setSize(800, 600);
-		mainFrame.setVisible(true);
-		mainFrame.pack();
-		mainFrame.setMinimumSize(new Dimension(mainFrame.getWidth(), mainFrame.getHeight()));
-		mainFrame.pack();
+		if(!quiet)
+		{
+			mainFrame.setSize(800, 600);
+			mainFrame.setVisible(true);
+			mainFrame.pack();
+			mainFrame.setMinimumSize(new Dimension(mainFrame.getWidth(), mainFrame.getHeight()));
+			mainFrame.pack();
+		}
+		else
+			mainFrame.setVisible(false);
 		load();
+		inited = true;
 	}
 
 	private void registerCombos()
@@ -158,12 +211,14 @@ public class MainUI implements ActionListener
 
 		pipelineTypeBox = new JComboBox();
 		pipelineTypeBox.setBackground(Color.WHITE);
+		pipelineTypeBox.addActionListener(this);
 		for (PipelineType s : PipelineType.values())
 			pipelineTypeBox.addItem(s);
 		mainFrame.add(pipelineTypeBox, GridBagHelper.getConstraints(4, 3, 2, 1));
 
 		registerTypeBox = new JComboBox();
 		registerTypeBox.setBackground(Color.WHITE);
+		registerTypeBox.addActionListener(this);
 		for (RegisterType s : RegisterType.values())
 			registerTypeBox.addItem(s);
 		mainFrame.add(registerTypeBox, GridBagHelper.getConstraints(6, 3, 2, 1));
@@ -298,7 +353,6 @@ public class MainUI implements ActionListener
 			int returnValue = fileChooser.showOpenDialog(instructionSelectButton);
 			if (returnValue == JFileChooser.APPROVE_OPTION)
 				instructionSelectField.setText(fileChooser.getSelectedFile().getAbsolutePath());
-			save();
 		}
 		if (source == memorySelectButton)
 		{
@@ -308,7 +362,6 @@ public class MainUI implements ActionListener
 			int returnValue = fileChooser.showOpenDialog(memorySelectButton);
 			if (returnValue == JFileChooser.APPROVE_OPTION)
 				memorySelectField.setText(fileChooser.getSelectedFile().getAbsolutePath());
-			save();
 		}
 		if (source == addMemoryButton)
 			addMemory();
@@ -318,6 +371,8 @@ public class MainUI implements ActionListener
 			run();
 		if (source == removeButton)
 			removeButtonPressed();
+		if (inited)
+			save();
 	}
 
 	private void addMemory()
@@ -332,7 +387,6 @@ public class MainUI implements ActionListener
 		}
 		currentMemory = type.getMemory(getInt(memorySizeField), getInt(cacheLineSizeField), currentMemory, new File(memorySelectField.getText()));
 		updateMemoryList();
-		save();
 	}
 
 	private void run()
@@ -343,6 +397,7 @@ public class MainUI implements ActionListener
 			return;
 		}
 		currentMemory = currentMemory.clone();
+		currentMemory.setFile(new File(memorySelectField.getText()));
 		RegisterType regType = (RegisterType) registerTypeBox.getSelectedItem();
 		PipelineType pipType = (PipelineType) pipelineTypeBox.getSelectedItem();
 		InstructionReader reader = new InstructionReader(new File(instructionSelectField.getText()));

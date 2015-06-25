@@ -1,5 +1,6 @@
 package io.darkcraft.procsim.model.components.abstracts;
 
+import io.darkcraft.procsim.controller.MemoryState;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 
 import java.io.File;
@@ -71,4 +72,9 @@ public interface IMemory
 	 * @return an array of all of the memory which is connected to this memory (and this memory).
 	 */
 	public IMemory[] getStack();
+
+	/**
+	 * @return a memory state corresponding to the current state of the memory.
+	 */
+	public MemoryState getState();
 }

@@ -46,4 +46,12 @@ public class KeyboardListener
 		return ctrl;
 	}
 
+	public static int getMultiplier(int max)
+	{
+		if (KeyboardListener.isCtrlDown())
+			return KeyboardListener.isShiftDown() ? max : 100;
+		else
+			return KeyboardListener.isShiftDown() ? 10 : 1;
+	}
+
 }

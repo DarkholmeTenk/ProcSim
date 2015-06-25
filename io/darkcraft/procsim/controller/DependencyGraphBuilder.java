@@ -71,6 +71,37 @@ public class DependencyGraphBuilder
 		return inputs;
 	}
 
+	public static List<IDependency> getDependencies(IInstruction from, IInstruction to)
+	{
+		ArrayList<IDependency> dependencies = new ArrayList<IDependency>();
+		String aOut = from.getOutputRegister();
+		String[] aInputs = getInputRegisters(from);
+		if(from == to) return dependencies;
+		String bOut = to.getOutputRegister();
+		String[] bInputs = getInputRegisters(to);
+		if(aOut != null)
+		{
+			for(String bInput : bInputs)
+				if(bInput != null && aOut.equals(bInput))
+				{
+					dependencies.add(new RAW(from, to));
+					break;
+				}
+			if(aOut.equals(bOut))
+				dependencies.add(new WAW(from, to));
+		}
+		if(bOut != null)
+		{
+			for(String aInput : aInputs)
+				if(aInput != null && bOut.equals(aInput))
+				{
+					dependencies.add(new WAR(from, to));
+					break;
+				}
+		}
+		return dependencies;
+	}
+
 	private static MapList<Pair<IInstruction,IInstruction>,IDependency> getAllConnectionsNew(List<IInstruction> instructions)
 	{
 		MapList<Pair<IInstruction,IInstruction>,IDependency> map = new MapList();

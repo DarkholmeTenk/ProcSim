@@ -14,7 +14,7 @@ import java.util.Comparator;
 public class SuperScalarSimulator extends InOrderSimulator
 {
 	private IInstruction[] nexts;
-	private Comparator<AbstractPipeline>[] comparator;
+	protected Comparator<AbstractPipeline>[] comparator;
 
 	public SuperScalarSimulator(IMemory _mem, IRegisterBank _reg, InstructionReader _reader, AbstractPipeline... _pipelines)
 	{
@@ -29,10 +29,11 @@ public class SuperScalarSimulator extends InOrderSimulator
 	protected boolean stepPipelines()
 	{
 		boolean allEmpty = true;
-		addStage();
 		for(AbstractPipeline pl : pipeline)
 			if(!pl.isEmpty())
 				allEmpty = false;
+		if(!allEmpty)
+			addStage();
 		int length = pipeline[0].getPipelineStages().length;
 		int[][] exeBlocks = pipeline[0].getExeBlocks();
 		int max = MiscFunctions.max(exeBlocks);
@@ -78,7 +79,7 @@ public class SuperScalarSimulator extends InOrderSimulator
 	}
 
 	@Override
-	public void flushInstructionCache()
+	public void flushInstructionCache(int address)
 	{
 		nexts = new IInstruction[nexts.length];
 	}

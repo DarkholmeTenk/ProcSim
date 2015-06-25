@@ -2,17 +2,19 @@ package io.darkcraft.procsim.view;
 
 import io.darkcraft.procsim.controller.DataHelper;
 import io.darkcraft.procsim.controller.DependencyGraphBuilder;
+import io.darkcraft.procsim.controller.MemoryState;
 import io.darkcraft.procsim.controller.OutputController;
 import io.darkcraft.procsim.model.dependencies.IDependency;
+import io.darkcraft.procsim.model.helper.KeyboardListener;
 import io.darkcraft.procsim.model.helper.MapList;
 import io.darkcraft.procsim.model.instruction.IInstruction;
+import io.darkcraft.procsim.model.instruction.IMemoryInstruction;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 import io.darkcraft.procsim.view.drawing.ColourStore;
 import io.darkcraft.procsim.view.drawing.DrawingSurface;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,6 +37,7 @@ public class PipelineViewUI implements ActionListener
 	private static Dimension					labelSize		= new Dimension(150, 16);
 	private DrawingSurface						surface;
 	private JPanel								slotPanel;
+	private JPanel								memoryPanel;
 
 	private JButton								leftButton;
 	private JButton								rightButton;
@@ -45,6 +48,7 @@ public class PipelineViewUI implements ActionListener
 	private int									maxTime;
 	private int									stagesSkipped	= 0;
 	private List<IInstruction[][]>				pipelineData;
+	private List<MemoryState>					memoryData;
 	private MapList<IInstruction, IDependency>	deps;
 	private String[][]							stageNames;
 	private Set<Integer>						duplicateStages;
@@ -53,7 +57,8 @@ public class PipelineViewUI implements ActionListener
 	public PipelineViewUI(AbstractSimulator _sim)
 	{
 		sim = _sim;
-		pipelineData = sim.getMap();
+		pipelineData = sim.getStateTimeline();
+		memoryData = sim.getMemoryTimeline();
 		stageNames = sim.getStateNames();
 		maxTime = pipelineData.size() - 1;
 		duplicateStages = DataHelper.getDuplicateStates(pipelineData);
@@ -88,21 +93,17 @@ public class PipelineViewUI implements ActionListener
 		slotPanel.setLayout(GridBagHelper.getLayout());
 		labels = new JLabel[stageNames.length][];
 
-		Font headFont = new Font(Font.SANS_SERIF, Font.BOLD, 12);
-		Font dataFont = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+
+
 		for (int i = 0; i < stageNames.length; i++)
 		{
 			labels[i] = new JLabel[stageNames[i].length];
 			for (int j = 0; j < stageNames[i].length; j++)
 			{
-				JLabel header = new JLabel(stageNames[i][j]);
-				header.setFont(headFont);
+				JLabel header = LabelHelper.get(stageNames[i][j]);
 				header.setHorizontalAlignment(SwingConstants.CENTER);
 				slotPanel.add(header, GridBagHelper.setWeights(1, 0, GridBagHelper.getConstraints(i, j * 2)));
-				JLabel data = new JLabel("");
-				data.setFont(dataFont);
-				data.setPreferredSize(labelSize);
-				data.setOpaque(true);
+				JLabel data = LabelHelper.getPlain("",labelSize,true);
 				labels[i][j] = data;
 				slotPanel.add(data, GridBagHelper.getConstraints(i, (j * 2) + 1));
 			}
@@ -113,7 +114,24 @@ public class PipelineViewUI implements ActionListener
 		layered.add(surface, GridBagHelper.getConstraints(0, 0));
 		layered.add(slotPanel, GridBagHelper.getConstraints(0, 0));
 		frame.add(layered, GridBagHelper.setWeights(1, GridBagHelper.getConstraints(0, 2, 5, 1)));
+		memoryPanel = new JPanel();
+		memoryPanel.setLayout(GridBagHelper.getLayout());
+		frame.add(memoryPanel, GridBagHelper.getConstraints(6, 2));
 		update();
+	}
+
+	private boolean showDep(int time, int pl, int st)
+	{
+		if(time == 0 || time >= maxTime-2) return false;
+		if(st >= (stageNames[pl].length - 1)) return false;
+		IInstruction[][] instructions = pipelineData.get(time);
+		IInstruction inst = instructions[pl][st];
+		if(inst instanceof IMemoryInstruction)
+			if(stageNames[pl][st].equals("MEM"))
+				return false;
+		if(instructions[pl][st+1] != null)
+			return false;
+		return true;
 	}
 
 	private HashMap<IInstruction,Integer> map;
@@ -149,7 +167,8 @@ public class PipelineViewUI implements ActionListener
 				}
 				else
 				{
-					if(j == sim.getLastIDStage(i) && depType != 0)
+					//if(j == sim.getLastIDStage(i) && depType != 0)
+					if(showDep(time,i,j) && depType != 0)
 						checkArrows(instructions,instructions[i][j],i,j);
 					label.setForeground(OutputController.stalledColor);
 				}
@@ -157,6 +176,42 @@ public class PipelineViewUI implements ActionListener
 		}
 		surface.revalidate();
 		surface.repaint();
+		frame.pack();
+		/*
+		 * Memory panel
+		 */
+		memoryPanel.setVisible(false);
+		memoryPanel.removeAll();
+		MemoryState m = memoryData.get(time);
+		int i = 0;
+		while(m != null)
+		{
+			int y = 5 * i;
+			JLabel label = LabelHelper.get(m.mem.toString());
+			memoryPanel.add(label, GridBagHelper.getConstraints(0,y,2,1));
+			memoryPanel.add(LabelHelper.getPlain("Reads:"), GridBagHelper.getConstraints(0,y+1));
+			memoryPanel.add(LabelHelper.getPlain(""+m.reads),GridBagHelper.getConstraints(1,y+1));
+			memoryPanel.add(LabelHelper.getPlain("Writes:"), GridBagHelper.getConstraints(0,y+2));
+			memoryPanel.add(LabelHelper.getPlain(""+m.writes),GridBagHelper.getConstraints(1,y+2));
+			if(m.conflicts > 0)
+			{
+				memoryPanel.add(LabelHelper.getPlain("Conflicts:"), GridBagHelper.getConstraints(0,y+3));
+				memoryPanel.add(LabelHelper.getPlain(""+m.conflicts),GridBagHelper.getConstraints(1,y+3));
+			}
+			if(m.misses > 0)
+			{
+				memoryPanel.add(LabelHelper.getPlain("Misses:"), GridBagHelper.getConstraints(0,y+4));
+				memoryPanel.add(LabelHelper.getPlain(""+m.misses),GridBagHelper.getConstraints(1,y+4));
+			}
+			m = m.nextLevel;
+			i++;
+		}
+		memoryPanel.revalidate();
+		memoryPanel.setVisible(true);
+		frame.revalidate();
+		/*
+		 * Repack
+		 */
 		frame.pack();
 		surface.setPreferredSize(slotPanel.getPreferredSize());
 		frame.pack();
@@ -167,7 +222,6 @@ public class PipelineViewUI implements ActionListener
 	{
 		List<IDependency> dependencies = deps.getList(inst);
 		if(dependencies.size() == 0) return;
-		int count = 0;
 		for(int i = 0; i < instructions.length; i++)
 		{
 			for(int j = y; j < instructions[i].length; j++)
@@ -191,6 +245,11 @@ public class PipelineViewUI implements ActionListener
 		double y1 = st1 * (labelSize.getHeight()*2 + 7) + 8;
 		double x2 = pl2 * (labelSize.getWidth() + 8) + 100 + (i2 * 16);
 		double y2 = st2 * (labelSize.getHeight()*2 + 7) + 8;
+		if(y1 == y2)
+		{
+			y1 -= 2;
+			y2 += 2;
+		}
 		map.put(d.getFrom(), i2+1);
 		mapTwo.put(d.getTo(), i+1);
 		if(depType == 2)
@@ -206,6 +265,7 @@ public class PipelineViewUI implements ActionListener
 		if (o == leftButton || o == rightButton)
 		{
 			int offset = (o == leftButton) ? -1 : 1;
+			offset *= KeyboardListener.getMultiplier(maxTime);
 			time = Math.max(0, Math.min(maxTime, time + offset));
 			stagesSkipped = 0;
 			while (duplicateStages.contains(time))

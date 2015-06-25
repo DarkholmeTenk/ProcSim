@@ -59,7 +59,7 @@ public class InstructionReader
 			String line = reader.readLine();
 			if (line == null)
 				return null;
-			while (line != null && line.isEmpty())
+			while (line != null && (line.isEmpty() || line.trim().startsWith(";")))
 				line = reader.readLine();
 			if (line == null)
 				return null;

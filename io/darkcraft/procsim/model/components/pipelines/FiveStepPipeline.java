@@ -112,19 +112,20 @@ public class FiveStepPipeline extends AbstractPipeline
 				{
 					exe.doExecute();
 					String out = exe.getOutputRegister();
-					registers.setAvailable(exe, out, exe.getOutputRegisterValue());
+
 					if(exe instanceof Branch)
 					{
 						int newPC = ((Branch)exe).getAddress(reader);
-						registers.setAvailable(exe, "PC", newPC);
 						sim.clearAfter(exe.getStartTime());
-						sim.flushInstructionCache();
+						sim.flushInstructionCache(exe.getAddress());
+						registers.setAvailable(exe, "PC", newPC);
 					}
 					else if("PC".equals(exe.getOutputRegister()))
 					{
 						sim.clearAfter(exe.getStartTime());
-						sim.flushInstructionCache();
+						sim.flushInstructionCache(exe.getAddress());
 					}
+					registers.setAvailable(exe, out, exe.getOutputRegisterValue());
 				}
 				else
 				{

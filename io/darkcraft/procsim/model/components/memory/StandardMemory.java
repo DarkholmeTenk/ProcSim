@@ -1,5 +1,6 @@
 package io.darkcraft.procsim.model.components.memory;
 
+import io.darkcraft.procsim.controller.MemoryState;
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.helper.OutputHelper;
 import io.darkcraft.procsim.model.helper.ReadingHelper;
@@ -19,11 +20,13 @@ public class StandardMemory implements IMemory
 	public final static int					READTIME	= 50;
 	public final static int					WRITETIME	= 51;
 
+	private int								reads		= 0;
+	private int								writes		= 0;
 	private final int						size;
 	private final int[]						data;
 	private final HashMap<String, Integer>	mnemonicMap	= new HashMap<String, Integer>();
 	private int								timer		= 0;
-	private HashMap<Object,Integer>			inTimes		= new HashMap<Object,Integer>();
+	private HashMap<Object, Integer>		inTimes		= new HashMap<Object, Integer>();
 	private File							inputData;
 
 	public StandardMemory(int _size, File _inputData)
@@ -48,14 +51,19 @@ public class StandardMemory implements IMemory
 	@Override
 	public int getValue(Object i, int location)
 	{
-		if(i != null)
+		if (i != null)
+		{
+			reads++;
 			inTimes.put(i, timer);
+		}
 		return data[location];
 	}
 
 	@Override
 	public void setValue(Object i, int location, int value)
 	{
+		if (i != null)
+			writes++;
 		inTimes.put(i, timer);
 		data[location] = value;
 	}
@@ -63,7 +71,7 @@ public class StandardMemory implements IMemory
 	@Override
 	public int getLocation(String identifier)
 	{
-		if(mnemonicMap.containsKey(identifier))
+		if (mnemonicMap.containsKey(identifier))
 			return mnemonicMap.get(identifier);
 		return 0;
 	}
@@ -71,12 +79,13 @@ public class StandardMemory implements IMemory
 	@Override
 	public boolean doneOperation(Object i)
 	{
-		if(!inTimes.containsKey(i)) return true;
+		if (!inTimes.containsKey(i))
+			return true;
 		int inTime = inTimes.get(i);
-		if(i instanceof IMemoryInstruction)
+		if (i instanceof IMemoryInstruction)
 		{
-			MemoryInstructionType type = ((IMemoryInstruction)i).getType();
-			if(type == MemoryInstructionType.READ)
+			MemoryInstructionType type = ((IMemoryInstruction) i).getType();
+			if (type == MemoryInstructionType.READ)
 				return timer >= (inTime + READTIME);
 			else
 				return timer >= (inTime + WRITETIME);
@@ -93,13 +102,14 @@ public class StandardMemory implements IMemory
 	@Override
 	public String toString()
 	{
-		return "Main Memory (" + OutputHelper.byteString(size*getWordSize()) + ")";
+		return "Main Memory (" + OutputHelper.byteString(size * getWordSize()) + ")";
 	}
 
 	@Override
 	public void read()
 	{
-		if(inputData == null || (inputData.isDirectory() || !inputData.exists())) return;
+		if (inputData == null || (inputData.isDirectory() || !inputData.exists()))
+			return;
 		try
 		{
 			BufferedReader reader = new BufferedReader(new FileReader(inputData));
@@ -116,7 +126,7 @@ public class StandardMemory implements IMemory
 					data[i++] = Integer.parseInt(split[1], 16);
 				}
 				else
-					data[i++] = Integer.parseInt(split[0],16);
+					data[i++] = Integer.parseInt(split[0], 16);
 			}
 			reader.close();
 		}
@@ -135,12 +145,19 @@ public class StandardMemory implements IMemory
 	@Override
 	public IMemory clone()
 	{
-		return new StandardMemory(size,inputData);
+		return new StandardMemory(size, inputData);
 	}
 
 	@Override
 	public IMemory[] getStack()
 	{
-		return new IMemory[]{this};
+		return new IMemory[]
+		{ this };
+	}
+
+	@Override
+	public MemoryState getState()
+	{
+		return new MemoryState(this, reads, writes);
 	}
 }

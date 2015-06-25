@@ -87,7 +87,7 @@ public class InOrderSimulator extends AbstractSimulator
 	}
 
 	@Override
-	public void flushInstructionCache()
+	public void flushInstructionCache(int address)
 	{
 		next = null;
 	}

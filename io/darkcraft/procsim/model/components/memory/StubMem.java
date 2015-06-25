@@ -1,5 +1,6 @@
 package io.darkcraft.procsim.model.components.memory;
 
+import io.darkcraft.procsim.controller.MemoryState;
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 
@@ -70,6 +71,13 @@ public class StubMem implements IMemory
 
 	@Override
 	public IMemory[] getStack()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public MemoryState getState()
 	{
 		// TODO Auto-generated method stub
 		return null;

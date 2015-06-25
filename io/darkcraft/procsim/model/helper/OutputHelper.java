@@ -12,7 +12,7 @@ public class OutputHelper
 {
 	public static void output(AbstractSimulator sim)
 	{
-		output(sim, sim.getStateNames(), sim.getMap(), sim.getInstructions());
+		output(sim, sim.getStateNames(), sim.getStateTimeline(), sim.getInstructions());
 	}
 
 	public static void output(AbstractSimulator sim, String[][] stateNames, List<IInstruction[][]> states, List<IInstruction> instructions)
@@ -36,7 +36,7 @@ public class OutputHelper
 
 	public static List<List<Pair<IInstruction,String>>> outputData(AbstractSimulator sim)
 	{
-		return outputData(sim, sim.getStateNames(), sim.getMap(), sim.getInstructions());
+		return outputData(sim, sim.getStateNames(), sim.getStateTimeline(), sim.getInstructions());
 	}
 
 	private static int idIndex(String[] stateNames)

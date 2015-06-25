@@ -43,7 +43,7 @@ public class SimulatorTest
 
 		AbstractSimulator sim = new SuperScalarSimulator(mem,reg,read, pipe, pipeTwo);
 		while(sim.step());
-		OutputHelper.output(sim,sim.getStateNames(), sim.getMap(), read.getAll());
+		OutputHelper.output(sim,sim.getStateNames(), sim.getStateTimeline(), read.getAll());
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class SimulatorTest
 
 		AbstractSimulator sim = new SuperScalarSimulator(mem,reg,read, pipe, pipeTwo, pipeThr, pipeFor);
 		while(sim.step());
-		OutputHelper.output(sim,sim.getStateNames(), sim.getMap(), read.getAll());
+		OutputHelper.output(sim,sim.getStateNames(), sim.getStateTimeline(), read.getAll());
 	}
 
 	@Test
@@ -74,6 +74,6 @@ public class SimulatorTest
 
 		AbstractSimulator sim = new InOrderSimulator(mem,reg,pipe,read);
 		while(sim.step());
-		OutputHelper.output(sim,sim.getStateNames(), sim.getMap(), read.getAll());
+		OutputHelper.output(sim,sim.getStateNames(), sim.getStateTimeline(), read.getAll());
 	}
 }

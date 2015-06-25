@@ -1,6 +1,7 @@
 package io.darkcraft.procsim.model.simulator;
 
 import io.darkcraft.procsim.controller.DependencyType;
+import io.darkcraft.procsim.controller.MemoryState;
 import io.darkcraft.procsim.model.components.abstracts.AbstractPipeline;
 import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.components.abstracts.IRegisterBank;
@@ -13,29 +14,35 @@ import java.util.List;
 
 public abstract class AbstractSimulator
 {
-	protected final IMemory				mem;
-	protected final IRegisterBank		reg;
-	protected final AbstractPipeline[]	pipeline;
-	protected final AbstractPipeline[]	pipelineUnchanged;
-	protected final InstructionReader	reader;
-	private final ArrayList<IInstruction[][]> stateTimeline;
+	protected final IMemory						mem;
+	protected final IRegisterBank				reg;
+	protected final AbstractPipeline[]			pipeline;
+	protected final AbstractPipeline[]			pipelineUnchanged;
+	protected final InstructionReader			reader;
+	private final ArrayList<IInstruction[][]>	stateTimeline;
+	private final ArrayList<MemoryState>		memTimeline;
 
 	/**
 	 * Instantiates the important variables in an abstract simulator.
-	 * @param _mem the memory to be used as the closest memory/cache to the processor
-	 * @param _reg the register bank to use
-	 * @param _pipeline the pipelines to use
-	 * @param _reader the instruction reader to use
+	 *
+	 * @param _mem
+	 *            the memory to be used as the closest memory/cache to the processor
+	 * @param _reg
+	 *            the register bank to use
+	 * @param _pipeline
+	 *            the pipelines to use
+	 * @param _reader
+	 *            the instruction reader to use
 	 */
 	public AbstractSimulator(IMemory _mem, IRegisterBank _reg, AbstractPipeline[] _pipeline, InstructionReader _reader)
 	{
 		mem = _mem;
 		mem.read();
 		reg = _reg;
-		if(_pipeline.length > getMaxPipelines())
+		if (_pipeline.length > getMaxPipelines())
 		{
 			AbstractPipeline[] newPipelines = new AbstractPipeline[getMaxPipelines()];
-			for(int i = 0; i < newPipelines.length; i++)
+			for (int i = 0; i < newPipelines.length; i++)
 				newPipelines[i] = _pipeline[i];
 			_pipeline = newPipelines;
 		}
@@ -43,40 +50,46 @@ public abstract class AbstractSimulator
 		pipelineUnchanged = pipeline.clone();
 		reader = _reader;
 		stateTimeline = new ArrayList<IInstruction[][]>();
+		memTimeline = new ArrayList<MemoryState>();
 	}
 
 	protected void addStage()
 	{
 		IInstruction[][] states = new IInstruction[pipeline.length][];
-		for(int i = 0; i < states.length; i++)
+		for (int i = 0; i < states.length; i++)
 			states[i] = pipelineUnchanged[i].getState();
 		stateTimeline.add(states);
+		memTimeline.add(mem.getState());
 	}
 
 	/**
 	 * Steps all of the functional units forwards, while ensuring that instructions finish execution in order.
-	 * @param exeBlocks a 2D array of (functional unit, step in functional unit)
+	 *
+	 * @param exeBlocks
+	 *            a 2D array of (functional unit, step in functional unit)
 	 */
 	protected void stepUnsafe(int[][] exeBlocks)
 	{
 		boolean[][] done = new boolean[pipeline.length][exeBlocks.length];
-		for(int count = 0; count < (pipeline.length * exeBlocks.length); count++)
+		for (int count = 0; count < (pipeline.length * exeBlocks.length); count++)
 		{
 			int lowestVal = Integer.MAX_VALUE;
 			int lowestPL = -1;
 			int lowestEB = -1;
 			int lowestIB = -1;
-			for(int plI = 0; plI < pipeline.length; plI++)
+			for (int plI = 0; plI < pipeline.length; plI++)
 			{
-				for(int ebI = 0; ebI < exeBlocks.length; ebI++)
+				for (int ebI = 0; ebI < exeBlocks.length; ebI++)
 				{
-					if(done[plI][ebI]) continue;
+					if (done[plI][ebI])
+						continue;
 					IInstruction inst = null;
 					int ibI = -1;
-					while(inst == null && (++ibI) < exeBlocks[ebI].length)
+					while (inst == null && (++ibI) < exeBlocks[ebI].length)
 						inst = pipeline[plI].getInstruction(exeBlocks[ebI][ibI]);
-					if(inst == null) continue;
-					if(inst.getStartTime() < lowestVal)
+					if (inst == null)
+						continue;
+					if (inst.getStartTime() < lowestVal)
 					{
 						lowestVal = inst.getStartTime();
 						lowestPL = plI;
@@ -85,18 +98,21 @@ public abstract class AbstractSimulator
 					}
 				}
 			}
-			if(lowestPL == -1) break;
-			if(lowestIB >= 1) break;
+			if (lowestPL == -1)
+				break;
+			if (lowestIB >= 1)
+				break;
 			done[lowestPL][lowestEB] = true;
 			int stage = exeBlocks[lowestEB][0];
 			pipeline[lowestPL].stepStage(this, stage);
-			if(pipeline[lowestPL].getInstruction(stage) != null) break;
+			if (pipeline[lowestPL].getInstruction(stage) != null)
+				break;
 		}
-		for(AbstractPipeline pl: pipeline)
+		for (AbstractPipeline pl : pipeline)
 		{
-			for(int[] x : exeBlocks)
+			for (int[] x : exeBlocks)
 			{
-				for(int i = 1; i < x.length; i++)
+				for (int i = 1; i < x.length; i++)
 					pl.stepStage(this, x[i]);
 			}
 		}
@@ -114,7 +130,7 @@ public abstract class AbstractSimulator
 	public String[][] getStateNames()
 	{
 		String[][] stateNames = new String[pipeline.length][];
-		for(int i = 0; i < stateNames.length; i++)
+		for (int i = 0; i < stateNames.length; i++)
 			stateNames[i] = pipeline[i].getPipelineShorts();
 		return stateNames;
 	}
@@ -122,25 +138,35 @@ public abstract class AbstractSimulator
 	/**
 	 * @return an array list with each entry representing the state of the pipeline at that time
 	 */
-	public ArrayList<IInstruction[][]> getMap()
+	public ArrayList<IInstruction[][]> getStateTimeline()
 	{
 		return stateTimeline;
 	}
 
 	/**
+	 * @return an array list with each entry representing the state of the memory at that time
+	 */
+	public List<MemoryState> getMemoryTimeline()
+	{
+		return memTimeline;
+	}
+
+	/**
 	 * Clears every instruction in all of the pipelines which comes after step i
+	 *
 	 * @param i
 	 */
 	public void clearAfter(int i)
 	{
-		for(AbstractPipeline p : pipeline)
+		for (AbstractPipeline p : pipeline)
 			p.clearAfter(i);
 	}
 
 	/**
 	 * Forces the simulator to dump its cache of instructions. Used by branches.
+	 * @param i
 	 */
-	public abstract void flushInstructionCache();
+	public abstract void flushInstructionCache(int i);
 
 	/**
 	 * @return a list containing all of the instructions which have passed through this simulator
@@ -149,10 +175,10 @@ public abstract class AbstractSimulator
 	{
 		List<IInstruction> insts = new ArrayList(reader.getAll());
 		Iterator<IInstruction> iter = insts.iterator();
-		while(iter.hasNext())
+		while (iter.hasNext())
 		{
 			IInstruction i = iter.next();
-			if(!i.hasStarted())
+			if (!i.hasStarted())
 				iter.remove();
 		}
 		return reader.getAll();
@@ -165,20 +191,25 @@ public abstract class AbstractSimulator
 
 	/**
 	 * Used to identify which type of dependency arrows to display for stalls.
-	 * @param dep the dependency type to check
+	 *
+	 * @param dep
+	 *            the dependency type to check
 	 * @return true if the dependency type's arrows should be displayed.
 	 */
 	public boolean isImportant(DependencyType dep)
 	{
-		switch(dep)
+		switch (dep)
 		{
-		case RAW: return true;
-		default: return false;
+		case RAW:
+			return true;
+		default:
+			return false;
 		}
 	}
 
 	/**
 	 * Returns the last ID stage in pipeline pl
+	 *
 	 * @param pl
 	 */
 	public int getLastIDStage(int pl)
@@ -188,13 +219,27 @@ public abstract class AbstractSimulator
 
 	/**
 	 * Used for highlighting stall dependencies.
+	 *
 	 * @param pl
 	 * @param stage
 	 * @return true if stage is one of the first executable stages in pipeline pl
-	 * @throws IndexOutOfBoundsException if pl >= number of pipelines
+	 * @throws IndexOutOfBoundsException
+	 *             if pl >= number of pipelines
 	 */
 	public boolean isExeStage(int pl, int stage)
 	{
 		return pipeline[pl].isFirstExeStage(stage);
+	}
+
+	/**
+	 * @param passing the instruction which wants to get ahead
+	 * @param toPass the instruction it wants to get ahead of
+	 * @return true if passing can pass toPass
+	 */
+	protected boolean canInstructionPass(IInstruction passing, IInstruction toPass)
+	{
+		if(passing.getStartTime() < toPass.getStartTime())
+			return true;
+		return false;
 	}
 }

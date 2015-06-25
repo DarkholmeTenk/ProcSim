@@ -26,6 +26,7 @@ public class InstructionFactory
 	{
 		line = line.trim();
 		int comment = line.indexOf(';');
+		if(comment == 0) return null;
 		if(comment != -1)
 			line = line.substring(0,comment);
 		line = line.trim();

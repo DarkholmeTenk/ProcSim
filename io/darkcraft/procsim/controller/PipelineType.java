@@ -38,4 +38,12 @@ public enum PipelineType
 	{
 		return getName();
 	}
+
+	public static PipelineType get(String name)
+	{
+		for(PipelineType p : values())
+			if(p.getName().equals(name))
+				return p;
+		return null;
+	}
 }

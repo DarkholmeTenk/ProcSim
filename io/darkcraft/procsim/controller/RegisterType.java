@@ -35,4 +35,12 @@ public enum RegisterType
 	{
 		return getName();
 	}
+
+	public static RegisterType get(String name)
+	{
+		for(RegisterType p : values())
+			if(p.getName().equals(name))
+				return p;
+		return null;
+	}
 }

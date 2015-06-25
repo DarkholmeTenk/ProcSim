@@ -54,6 +54,8 @@ public class OutputUI implements ActionListener
 			importantDependencyType[dt.ordinal()] = _sim.isImportant(dt);
 		mainFrame = new JFrame();
 		mainFrame.setTitle("ProcSim - Space Time Graph");
+		if(!MainUI.i.mainFrame.isVisible())
+			mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainContainer = new JPanel();
 		mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.LINE_AXIS));
 		mainFrame.setLayout(GridBagHelper.getLayout());
@@ -155,10 +157,7 @@ public class OutputUI implements ActionListener
 			dataPanel.setVisible(false);
 			surface.setVisible(false);
 			int toChange = source == stateLeftButton ? -1 : 1;
-			if (KeyboardListener.isCtrlDown())
-				toChange *= KeyboardListener.isShiftDown() ? maxStateNum : 100;
-			else
-				toChange *= KeyboardListener.isShiftDown() ? 10 : 1;
+			toChange *= KeyboardListener.getMultiplier(maxStateNum);
 			stateNum = Math.min(maxStateNum, Math.max(1, stateNum + toChange));
 			dataPanel.removeAll();
 			controller.clear();
