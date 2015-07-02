@@ -82,7 +82,7 @@ public class DependencyGraphBuilder
 		if(aOut != null)
 		{
 			for(String bInput : bInputs)
-				if(bInput != null && aOut.equals(bInput))
+				if((bInput != null) && aOut.equals(bInput))
 				{
 					dependencies.add(new RAW(from, to));
 					break;
@@ -93,7 +93,7 @@ public class DependencyGraphBuilder
 		if(bOut != null)
 		{
 			for(String aInput : aInputs)
-				if(aInput != null && bOut.equals(aInput))
+				if((aInput != null) && bOut.equals(aInput))
 				{
 					dependencies.add(new WAR(from, to));
 					break;
@@ -123,7 +123,7 @@ public class DependencyGraphBuilder
 				if(aOut != null)
 				{
 					for(String bInput : bInputs)
-						if(bInput != null && aOut.equals(bInput))
+						if((bInput != null) && aOut.equals(bInput))
 						{
 							dependencies.add(new RAW(a, b));
 							break;
@@ -134,7 +134,7 @@ public class DependencyGraphBuilder
 				if(bOut != null)
 				{
 					for(String aInput : aInputs)
-						if(aInput != null && bOut.equals(aInput))
+						if((aInput != null) && bOut.equals(aInput))
 						{
 							dependencies.add(new WAR(a, b));
 							break;
@@ -162,17 +162,28 @@ public class DependencyGraphBuilder
 						continue;
 					}
 					if(dependenciesTwo == null) continue;
-					for(IDependency dOne : dependencies)	//For all the dependencies we're adding (a->b)
+					for(IDependency aToB : dependencies)	//For all the dependencies we're adding (a->b)
 					{
-						for(IDependency dTwo : dependenciesTwo)	//For all the dependencies which lead to current start (from->a)
+						for(IDependency fromToA : dependenciesTwo)	//For all the dependencies which lead to current start (from->a)
 						{
-							if(dOne.getType() != dTwo.getType()) continue;	//If they are not the same, try the next combo
+							//if(dOne.getType() != dTwo.getType()) continue;	//If they are not the same, try the next combo
 							Iterator<IDependency> iter = dependenciesOne.iterator();
 							while(iter.hasNext())	//For all the ones leading to current end (from->b)
 							{
-								IDependency oldD = iter.next();
-								if(oldD.getType() == dOne.getType())		//If it's the same type as the other 2 deps
+								IDependency fromToB = iter.next();
+								if((fromToB.getType() == aToB.getType()) && (aToB.getType() == fromToA.getType()))		//If it's the same type as the other 2 deps
 									iter.remove();							//Remove it (from->b leaving from->a and a->b)
+								if(fromToA.getDependentRegister().equals(fromToB.getDependentRegister())
+										&& fromToA.getDependentRegister().equals(aToB.getDependentRegister()))
+								{
+									if(((fromToB.getType()==DependencyType.RAW))
+																			&& (aToB.getType() == fromToB.getType())
+																			&& (fromToA.getType() == DependencyType.WAW))
+										iter.remove();
+									if((fromToB.getType() == DependencyType.WAR) && (fromToA.getType() == DependencyType.WAR)
+											&& (aToB.getType() == DependencyType.WAW))
+										iter.remove();
+								}
 							}
 						}
 					}
@@ -191,7 +202,7 @@ public class DependencyGraphBuilder
 	private static List<IDependency> getAllConnections(List<IInstruction> instructions)
 	{
 		ArrayList<IDependency> dependencies = new ArrayList<IDependency>();
-		for(int i = 0; i < instructions.size() - 1; i++)
+		for(int i = 0; i < (instructions.size() - 1); i++)
 		{
 			IInstruction a = instructions.get(i);
 			String aOut = a.getOutputRegister();
@@ -205,7 +216,7 @@ public class DependencyGraphBuilder
 				if(aOut != null)
 				{
 					for(String bInput : bInputs)
-						if(bInput != null && aOut.equals(bInput))
+						if((bInput != null) && aOut.equals(bInput))
 							dependencies.add(new RAW(a, b));
 					if(aOut.equals(bOut))
 						dependencies.add(new WAW(a,b));
@@ -213,7 +224,7 @@ public class DependencyGraphBuilder
 				if(bOut != null)
 				{
 					for(String aInput : aInputs)
-						if(aInput != null && bOut.equals(aInput))
+						if((aInput != null) && bOut.equals(aInput))
 							dependencies.add(new WAR(a, b));
 				}
 			}
@@ -250,7 +261,7 @@ public class DependencyGraphBuilder
 		if(aOut != null)
 		{
 			for(String bInput : bInputs)
-				if(bInput != null && aOut.equals(bInput))
+				if((bInput != null) && aOut.equals(bInput))
 					return true;
 			if(aOut.equals(bOut))
 				return true;
@@ -258,7 +269,7 @@ public class DependencyGraphBuilder
 		if(bOut != null)
 		{
 			for(String aInput : aInputs)
-				if(aInput != null && bOut.equals(aInput))
+				if((aInput != null) && bOut.equals(aInput))
 					return true;
 		}
 		if(second instanceof Branch) return true;

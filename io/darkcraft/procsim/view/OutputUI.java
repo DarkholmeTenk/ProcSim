@@ -1,9 +1,11 @@
 package io.darkcraft.procsim.view;
 
+import io.darkcraft.procsim.controller.DependencyGraphBuilder;
 import io.darkcraft.procsim.controller.DependencyType;
 import io.darkcraft.procsim.controller.OutputController;
 import io.darkcraft.procsim.model.dependencies.IDependency;
 import io.darkcraft.procsim.model.helper.KeyboardListener;
+import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 import io.darkcraft.procsim.view.drawing.DrawingSurface;
 
@@ -11,6 +13,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -34,10 +37,12 @@ public class OutputUI implements ActionListener
 	private JButton				stateLeftButton;
 	private JButton				stateRightButton;
 	private JButton				pipelineViewButton;
+	private JButton				dependencyViewButton;
 	private JLayeredPane		layered;
 	// 1 = arrows, 2 = stars, 0 = none
 	public int					dependencyDisplay	= 1;
 	private PipelineViewUI		plvui				= null;
+	private DependencyViewUI	dpvui				= null;
 
 	public int					stateNum			= 0;
 	private int					maxStateNum			= 1;
@@ -100,7 +105,7 @@ public class OutputUI implements ActionListener
 		mainContainer.setPreferredSize(new Dimension(x, y));
 		addOtherStuff(sim);
 		mainFrame.pack();
-		if (mainFrame.getWidth() > 1250 || mainFrame.getHeight() > 1000)
+		if ((mainFrame.getWidth() > 1250) || (mainFrame.getHeight() > 1000))
 			mainFrame.setMinimumSize(new Dimension(Math.min(1000 + instructionPane.getWidth() + 20, mainFrame.getWidth()), Math.min(875, mainFrame.getHeight())));
 		else
 			mainFrame.setMinimumSize(mainFrame.getSize());
@@ -125,6 +130,9 @@ public class OutputUI implements ActionListener
 		pipelineViewButton = new JButton("Pipeline view");
 		pipelineViewButton.addActionListener(this);
 		mainFrame.add(pipelineViewButton, GridBagHelper.getConstraints(6, 11));
+		dependencyViewButton = new JButton("Dependency view");
+		dependencyViewButton.addActionListener(this);
+		mainFrame.add(dependencyViewButton, GridBagHelper.getConstraints(5,11));
 	}
 
 	private void runSim()
@@ -152,7 +160,7 @@ public class OutputUI implements ActionListener
 			dependencyDisplay = dependencyDisplay % 3;
 			controller.addArrowsToSurface();
 		}
-		if (source == stateLeftButton || source == stateRightButton)
+		if ((source == stateLeftButton) || (source == stateRightButton))
 		{
 			dataPanel.setVisible(false);
 			surface.setVisible(false);
@@ -170,8 +178,16 @@ public class OutputUI implements ActionListener
 		}
 		if (source == pipelineViewButton)
 		{
-			if(plvui == null || !plvui.isVisible())
+			if((plvui == null) || !plvui.isVisible())
 				plvui = new PipelineViewUI(sim);
+		}
+		if(source == dependencyViewButton)
+		{
+			if((dpvui == null) || !dpvui.isVisible())
+			{
+				List<IInstruction> insts = sim.getInstructions();
+				dpvui = new DependencyViewUI(sim, insts, DependencyGraphBuilder.getGraphNew(insts));
+			}
 		}
 	}
 

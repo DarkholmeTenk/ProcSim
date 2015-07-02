@@ -39,6 +39,18 @@ public class GridBagHelper
 		return c;
 	}
 
+	public static GridBagConstraints setInsets(int top, int left, int bottom, int right, GridBagConstraints c)
+	{
+		Insets i = new Insets(top, left,bottom, right);
+		return setInsets(i,c);
+	}
+
+	public static GridBagConstraints setInsets(Insets i, GridBagConstraints c)
+	{
+		c.insets = i;
+		return c;
+	}
+
 	public static GridBagConstraints getConstraints(int x, int y, int sx, int sy)
 	{
 		GridBagConstraints c = getConstraints(x,y);

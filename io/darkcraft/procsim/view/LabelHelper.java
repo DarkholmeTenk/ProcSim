@@ -9,6 +9,7 @@ public class LabelHelper
 {
 	public static final Font boldFont = new Font(Font.SANS_SERIF, Font.BOLD, 12);
 	public static final Font plainFont = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+	public static final Dimension defaultSize = new Dimension(125,14);
 	public static JLabel get(String s)
 	{
 		return get(s, null, false, boldFont);
@@ -53,9 +54,17 @@ public class LabelHelper
 	{
 		JLabel l = new JLabel(s);
 		if(d != null)
+		{
 			l.setPreferredSize(d);
+			l.setMinimumSize(d);
+		}
 		l.setOpaque(op);
 		l.setFont(f);
 		return l;
+	}
+
+	public static Dimension getSize()
+	{
+		return defaultSize;
 	}
 }
