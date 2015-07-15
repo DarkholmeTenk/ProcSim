@@ -35,7 +35,7 @@ public class FiveStepPipeline extends AbstractPipeline
 
 	protected boolean attemptToMove(int from, Integer to, boolean bReq)
 	{
-		if(to != null && pipeline.containsKey(to)) return false;
+		if((to != null) && pipeline.containsKey(to)) return false;
 		if(!pipeline.containsKey(from)) return false;
 		IInstruction toMove = pipeline.get(from).a;
 		if(bReq && !pipeline.get(from).b) return false;
@@ -75,7 +75,7 @@ public class FiveStepPipeline extends AbstractPipeline
 			wb.finish(timer);
 			pipeline.put(wbStage, new Pair(wb,true));
 			String out = wb.getOutputRegister();
-			if(out != null && !wb.didFail())
+			if((out != null) && !wb.didFail())
 				registers.setProperly(wb, out, wb.getOutputRegisterValue());
 		}
 		move(wbStage);
@@ -106,9 +106,9 @@ public class FiveStepPipeline extends AbstractPipeline
 			Conditional c = exe.getConditional();
 			if(c == null) throw new RuntimeException("C is null?");
 			Integer status = registers.getStatus(exe);
-			if(status != null || c == Conditional.AL)
+			if((status != null) || (c == Conditional.AL))
 			{
-				if(c == Conditional.AL || c.match(status))
+				if((c == Conditional.AL) || c.match(status))
 				{
 					exe.doExecute();
 					String out = exe.getOutputRegister();
@@ -340,7 +340,7 @@ public class FiveStepPipeline extends AbstractPipeline
 	@Override
 	public int getLastIDStage()
 	{
-		return 1;
+		return idStage;
 	}
 
 	@Override

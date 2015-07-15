@@ -1,0 +1,6 @@
+/Conditional.class
+/IInstruction.class
+/IMemoryInstruction.class
+/InstructionFactory.class
+/InstructionReader.class
+/MemoryInstructionType.class

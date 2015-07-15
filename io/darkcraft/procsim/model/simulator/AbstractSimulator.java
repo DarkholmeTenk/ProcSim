@@ -85,7 +85,7 @@ public abstract class AbstractSimulator
 						continue;
 					IInstruction inst = null;
 					int ibI = -1;
-					while (inst == null && (++ibI) < exeBlocks[ebI].length)
+					while ((inst == null) && ((++ibI) < exeBlocks[ebI].length))
 						inst = pipeline[plI].getInstruction(exeBlocks[ebI][ibI]);
 					if (inst == null)
 						continue;
@@ -242,4 +242,16 @@ public abstract class AbstractSimulator
 			return true;
 		return false;
 	}
+
+	public boolean hasInstructionWindow()
+	{
+		return false;
+	}
+
+	public List<IInstruction> getInstructionWindow(int stage)
+	{
+		return null;
+	}
+
+	public void setOOOData(int fetchesPerCycle, int windowSize){};
 }

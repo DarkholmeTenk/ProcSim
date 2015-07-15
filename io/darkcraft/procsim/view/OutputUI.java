@@ -8,6 +8,7 @@ import io.darkcraft.procsim.model.helper.KeyboardListener;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 import io.darkcraft.procsim.view.drawing.DrawingSurface;
+import io.darkcraft.procsim.view.pipeline.PipelineViewUI;
 
 import java.awt.Color;
 import java.awt.Dimension;

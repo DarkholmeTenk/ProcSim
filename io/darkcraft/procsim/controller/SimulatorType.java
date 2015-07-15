@@ -15,14 +15,21 @@ public enum SimulatorType
 	INORDERSINGLE("In Order - Single Scalar",1),
 	INORDERSUPER("In Order - Super Scalar",4),
 	OOOE("Out of Order Execution",4),
-	OOO("Out of Order",4);
+	OOO("Out of Order",4,true);
 
 	private final String name;
 	public final int maxPipelines;
+	public final boolean ooo;
 	private SimulatorType(String n, int max)
+	{
+		this(n,max,false);
+	}
+
+	private SimulatorType(String n, int max, boolean outOfOrder)
 	{
 		name = n;
 		maxPipelines = max;
+		ooo = outOfOrder;
 	}
 
 	public AbstractSimulator getSimulator(IMemory mem, IRegisterBank reg, InstructionReader read, AbstractPipeline... pipe)

@@ -1,0 +1,14 @@
+/AbstractInstruction.class
+/AbstractOneLiteralOneOutInstruction.class
+/AbstractTwoLiteralOneOutInstruction.class
+/Add.class
+/Branch.class
+/BranchLink.class
+/Compare.class
+/Load.class
+/Move.class
+/Mul.class
+/Nop.class
+/Store.class
+/Sub.class
+/Test.class

@@ -1,2 +1,5 @@
 *.swp
 .nfs*
+.project
+.classpath
+config.cfg

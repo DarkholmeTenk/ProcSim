@@ -15,8 +15,10 @@ import java.util.List;
 
 public class OoOIssueSimulator extends OoOExSimulator
 {
-	private static final int maxSize = 16;
+	private int maxSize = 16;
+	private int fetch = 4;
 	private List<IInstruction> window = new ArrayList(maxSize);
+	private List<List<IInstruction>> windowStore = new ArrayList();
 
 	public OoOIssueSimulator(IMemory _mem, IRegisterBank _reg, InstructionReader _reader, AbstractPipeline... _pipelines)
 	{
@@ -37,7 +39,7 @@ public class OoOIssueSimulator extends OoOExSimulator
 
 	private void nextInstructionsToWindow()
 	{
-		for(int i = 0; i < pipeline.length*2 && window.size() < maxSize; i++)
+		for(int i = 0; (i < fetch) && (window.size() < maxSize); i++)
 		{
 			int pc = reg.getValue("PC", null);
 			IInstruction inst = reader.get(pc);
@@ -62,8 +64,8 @@ public class OoOIssueSimulator extends OoOExSimulator
 				for(int j = 0; j < i; j++)
 				{
 					IInstruction to = window.get(j);
-					if(to instanceof Branch || (to != null &&
-												to.getOutputRegister() != null && to.getOutputRegister().equals("PC")))
+					if((to instanceof Branch) || ((to != null) &&
+												(to.getOutputRegister() != null) && to.getOutputRegister().equals("PC")))
 						continue instructionLoop;
 					List<IDependency> deps = DependencyGraphBuilder.getDependencies(inst, to);
 					if(deps.size() > 0)
@@ -113,10 +115,36 @@ public class OoOIssueSimulator extends OoOExSimulator
 		}
 	}
 
+	private void storeWindow()
+	{
+		List<IInstruction> newList = new ArrayList<IInstruction>(window);
+		windowStore.add(newList);
+	}
+
 	@Override
 	protected void assignNext()
 	{
 		nextInstructionsToWindow();
 		assignFromWindow();
+		storeWindow();
+	}
+
+	@Override
+	public boolean hasInstructionWindow()
+	{
+		return true;
+	}
+
+	@Override
+	public List<IInstruction> getInstructionWindow(int stage)
+	{
+		return windowStore.get(stage);
+	}
+
+	@Override
+	public void setOOOData(int fetchesPerCycle, int windowSize)
+	{
+		maxSize = windowSize;
+		fetch = fetchesPerCycle;
 	}
 }

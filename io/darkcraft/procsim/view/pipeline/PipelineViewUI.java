@@ -1,4 +1,4 @@
-package io.darkcraft.procsim.view;
+package io.darkcraft.procsim.view.pipeline;
 
 import io.darkcraft.procsim.controller.DataHelper;
 import io.darkcraft.procsim.controller.DependencyGraphBuilder;
@@ -10,6 +10,8 @@ import io.darkcraft.procsim.model.helper.MapList;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.IMemoryInstruction;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
+import io.darkcraft.procsim.view.GridBagHelper;
+import io.darkcraft.procsim.view.LabelHelper;
 import io.darkcraft.procsim.view.drawing.ColourStore;
 import io.darkcraft.procsim.view.drawing.DrawingSurface;
 
@@ -38,6 +40,7 @@ public class PipelineViewUI implements ActionListener
 	private DrawingSurface						surface;
 	private JPanel								slotPanel;
 	private JPanel								memoryPanel;
+	private InstructionWindowPanel				iwPanel;
 
 	private JButton								leftButton;
 	private JButton								rightButton;
@@ -117,12 +120,17 @@ public class PipelineViewUI implements ActionListener
 		memoryPanel = new JPanel();
 		memoryPanel.setLayout(GridBagHelper.getLayout());
 		frame.add(memoryPanel, GridBagHelper.getConstraints(6, 2));
+		if(sim.hasInstructionWindow())
+		{
+			iwPanel = new InstructionWindowPanel(sim);
+			frame.add(iwPanel, GridBagHelper.getConstraints(7,2));
+		}
 		update();
 	}
 
 	private boolean showDep(int time, int pl, int st)
 	{
-		if(time == 0 || time >= maxTime-2) return false;
+		if((time == 0) || (time >= (maxTime-2))) return false;
 		if(st >= (stageNames[pl].length - 1)) return false;
 		IInstruction[][] instructions = pipelineData.get(time);
 		IInstruction inst = instructions[pl][st];
@@ -158,9 +166,9 @@ public class PipelineViewUI implements ActionListener
 					label.setText(instructions[i][j].toString());
 				else
 					label.setText("");
-				if (prev == null || prev[i][j] != instructions[i][j] || prev[i][j] == null)
+				if ((prev == null) || (prev[i][j] != instructions[i][j]) || (prev[i][j] == null))
 				{
-					if(j > sim.getLastIDStage(i) && instructions[i][j] != null && instructions[i][j].didFail())
+					if((j > sim.getLastIDStage(i)) && (instructions[i][j] != null) && instructions[i][j].didFail())
 						label.setForeground(OutputController.failedColor);
 					else
 						label.setForeground(Color.BLACK);
@@ -168,7 +176,7 @@ public class PipelineViewUI implements ActionListener
 				else
 				{
 					//if(j == sim.getLastIDStage(i) && depType != 0)
-					if(showDep(time,i,j) && depType != 0)
+					if(showDep(time,i,j) && (depType != 0))
 						checkArrows(instructions,instructions[i][j],i,j);
 					label.setForeground(OutputController.stalledColor);
 				}
@@ -210,6 +218,11 @@ public class PipelineViewUI implements ActionListener
 		memoryPanel.setVisible(true);
 		frame.revalidate();
 		/*
+		 * Instruction window
+		 */
+		if(iwPanel != null)
+			iwPanel.update(time);
+		/*
 		 * Repack
 		 */
 		frame.pack();
@@ -230,7 +243,7 @@ public class PipelineViewUI implements ActionListener
 				if(to == null) continue;
 				for(IDependency d : dependencies)
 				{
-					if(sim.isImportant(d.getType()) && d.getFrom() == to)
+					if(sim.isImportant(d.getType()) && (d.getFrom() == to))
 						addArrow(x,y,i,j,d);
 				}
 			}
@@ -241,10 +254,10 @@ public class PipelineViewUI implements ActionListener
 	{
 		int i2 = map.containsKey(d.getFrom()) ? map.get(d.getFrom()) : 0;
 		int i = mapTwo.containsKey(d.getTo()) ? mapTwo.get(d.getTo()) : 0;
-		double x1 = pl1 * (labelSize.getWidth() + 8) + 50 - (i * 16);
-		double y1 = st1 * (labelSize.getHeight()*2 + 7) + 8;
-		double x2 = pl2 * (labelSize.getWidth() + 8) + 100 + (i2 * 16);
-		double y2 = st2 * (labelSize.getHeight()*2 + 7) + 8;
+		double x1 = ((pl1 * (labelSize.getWidth() + 8)) + 50) - (i * 16);
+		double y1 = (st1 * ((labelSize.getHeight()*2) + 7)) + 8;
+		double x2 = (pl2 * (labelSize.getWidth() + 8)) + 100 + (i2 * 16);
+		double y2 = (st2 * ((labelSize.getHeight()*2) + 7)) + 8;
 		if(y1 == y2)
 		{
 			y1 -= 2;
@@ -262,7 +275,7 @@ public class PipelineViewUI implements ActionListener
 	public void actionPerformed(ActionEvent e)
 	{
 		Object o = e.getSource();
-		if (o == leftButton || o == rightButton)
+		if ((o == leftButton) || (o == rightButton))
 		{
 			int offset = (o == leftButton) ? -1 : 1;
 			offset *= KeyboardListener.getMultiplier(maxTime);

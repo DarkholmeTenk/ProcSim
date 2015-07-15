@@ -34,24 +34,28 @@ import javax.swing.JTextField;
 
 public class MainUI implements ActionListener
 {
-	public static MainUI	i;
-	protected final JFrame	mainFrame;
-	private JButton			instructionSelectButton;
-	private JTextField		instructionSelectField;
-	private JButton			memorySelectButton;
-	private JTextField		memorySelectField;
-	private JComboBox		memoryTypeBox;
-	private JTextField		memorySizeField;
-	private JTextField		cacheLineSizeField;
-	private JButton			addMemoryButton;
-	private JList			currentMemField;
-	private IMemory			currentMemory	= null;
-	private JComboBox		simulatorTypeBox;
-	private JTextField		numPipelines;
-	private JButton			runButton;
-	private JButton			removeButton;
-	private JComboBox		pipelineTypeBox;
-	private JComboBox		registerTypeBox;
+	public static MainUI				i;
+	protected final JFrame				mainFrame;
+	private JButton						instructionSelectButton;
+	private JTextField					instructionSelectField;
+	private JButton						memorySelectButton;
+	private JTextField					memorySelectField;
+	private JComboBox<MemoryType>		memoryTypeBox;
+	private JTextField					memorySizeField;
+	private JTextField					cacheLineSizeField;
+	private JButton						addMemoryButton;
+	private JList						currentMemField;
+	private IMemory						currentMemory	= null;
+	private JComboBox<SimulatorType>	simulatorTypeBox;
+	private JTextField					numPipelines;
+	private JLabel						fetchPerCycleLabel;
+	private JTextField					fetchPerCycle;
+	private JLabel						windowSizeLabel;
+	private JTextField					windowSize;
+	private JButton						runButton;
+	private JButton						removeButton;
+	private JComboBox<PipelineType>		pipelineTypeBox;
+	private JComboBox<RegisterType>		registerTypeBox;
 	private boolean 		inited = false;
 
 	public static void main(String... args)
@@ -88,6 +92,7 @@ public class MainUI implements ActionListener
 
 	private void save()
 	{
+		if(!inited) return;
 		PrintWriter writer = null;
 		try
 		{
@@ -104,6 +109,8 @@ public class MainUI implements ActionListener
 			writer.println("SIM:" + simulatorTypeBox.getSelectedItem().toString());
 			writer.println("REG:" + registerTypeBox.getSelectedItem().toString());
 			writer.println("NPL:" + numPipelines.getText());
+			writer.println("FPC:" + fetchPerCycle.getText());
+			writer.println("IWS:" + windowSize.getText());
 		}
 		catch (IOException e)
 		{
@@ -140,11 +147,18 @@ public class MainUI implements ActionListener
 				if (split[0].equals("PLT"))
 					pipelineTypeBox.setSelectedItem(PipelineType.get(split[1]));
 				if (split[0].equals("SIM"))
+				{
 					simulatorTypeBox.setSelectedItem(SimulatorType.get(split[1]));
+					setSimType();
+				}
 				if (split[0].equals("REG"))
 					registerTypeBox.setSelectedItem(RegisterType.get(split[1]));
 				if (split[0].equals("NPL"))
 					numPipelines.setText(split[1]);
+				if (split[0].equals("FPC"))
+					fetchPerCycle.setText(split[1]);
+				if (split[0].equals("IWS"))
+					windowSize.setText(split[1]);
 			}
 		}
 		catch (IOException e)
@@ -192,6 +206,7 @@ public class MainUI implements ActionListener
 			mainFrame.setVisible(false);
 		load();
 		inited = true;
+		setSimType();
 	}
 
 	private void registerCombos()
@@ -212,9 +227,10 @@ public class MainUI implements ActionListener
 		pipelineTypeBox = new JComboBox();
 		pipelineTypeBox.setBackground(Color.WHITE);
 		pipelineTypeBox.addActionListener(this);
-		for (PipelineType s : PipelineType.values())
-			pipelineTypeBox.addItem(s);
+		/*for (PipelineType s : PipelineType.values())
+			pipelineTypeBox.addItem(s);*/
 		mainFrame.add(pipelineTypeBox, GridBagHelper.getConstraints(4, 3, 2, 1));
+		setSimType();
 
 		registerTypeBox = new JComboBox();
 		registerTypeBox.setBackground(Color.WHITE);
@@ -273,6 +289,12 @@ public class MainUI implements ActionListener
 
 		numPipelines = new JTextField("1");
 		mainFrame.add(numPipelines, GridBagHelper.getConstraints(3, 4, 1, 1));
+
+		fetchPerCycle = new JTextField("2");
+		mainFrame.add(fetchPerCycle, GridBagHelper.getConstraints(3, 8, 1, 1));
+
+		windowSize = new JTextField("8");
+		mainFrame.add(windowSize, GridBagHelper.getConstraints(3, 9, 1, 1));
 	}
 
 	private void registerLabels()
@@ -303,6 +325,12 @@ public class MainUI implements ActionListener
 
 		JLabel registerTypeLabel = new JLabel("Registers Type");
 		mainFrame.add(registerTypeLabel, GridBagHelper.getConstraints(6, 2, 2, 1, GridBagConstraints.CENTER));
+
+		fetchPerCycleLabel = LabelHelper.get("Fetch Per Cycle:");
+		mainFrame.add(fetchPerCycleLabel, GridBagHelper.getConstraints(2,8,1,1));
+
+		windowSizeLabel = LabelHelper.get("Window Size:");
+		mainFrame.add(windowSizeLabel, GridBagHelper.getConstraints(2,9,1,1));
 	}
 
 	private int getInt(JTextField field)
@@ -341,6 +369,29 @@ public class MainUI implements ActionListener
 		currentMemField.setListData(stack);
 	}
 
+	private void setSimType()
+	{
+		boolean init = inited;
+		if(init)
+			inited = false;
+		SimulatorType type = (SimulatorType) simulatorTypeBox.getSelectedItem();
+		PipelineType[] appropriatePipelineTypes = PipelineType.getValues(type.ooo);
+		pipelineTypeBox.removeAllItems();
+		for(PipelineType pt : appropriatePipelineTypes)
+			pipelineTypeBox.addItem(pt);
+		pipelineTypeBox.setSelectedIndex(0);
+		if(init)
+		{
+			fetchPerCycle.setVisible(type.ooo);
+			fetchPerCycleLabel.setVisible(type.ooo);
+			windowSize.setVisible(type.ooo);
+			windowSizeLabel.setVisible(type.ooo);
+			mainFrame.pack();
+			inited = true;
+		}
+		save();
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
@@ -363,9 +414,11 @@ public class MainUI implements ActionListener
 			if (returnValue == JFileChooser.APPROVE_OPTION)
 				memorySelectField.setText(fileChooser.getSelectedFile().getAbsolutePath());
 		}
+		if ((source == simulatorTypeBox) && inited)
+			setSimType();
 		if (source == addMemoryButton)
 			addMemory();
-		if (source == numPipelines || source == simulatorTypeBox || source == runButton)
+		if ((source == numPipelines) || (source == simulatorTypeBox) || (source == runButton))
 			validateNumPipelines();
 		if (source == runButton)
 			run();
@@ -406,6 +459,9 @@ public class MainUI implements ActionListener
 		for (int i = 0; i < pipes.length; i++)
 			pipes[i] = pipType.construct(currentMemory, registers, reader);
 		AbstractSimulator s = ((SimulatorType) simulatorTypeBox.getSelectedItem()).getSimulator(currentMemory, registers, reader, pipes);
+		int winSize = getInt(windowSize);
+		int fetchPC = getInt(fetchPerCycle);
+		s.setOOOData(fetchPC, winSize);
 		new OutputUI(s);
 	}
 
