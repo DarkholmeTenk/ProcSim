@@ -10,6 +10,12 @@ public class MiscFunctions
 		return false;
 	}
 
+	/**
+	 * @param a
+	 * @param b
+	 * @return -1 if b is not in the deep parts of a
+	 * @return the index of the int[] which contains b
+	 */
 	public static int in(int[][] a, int b)
 	{
 		for(int i = 0; i < a.length; i++)

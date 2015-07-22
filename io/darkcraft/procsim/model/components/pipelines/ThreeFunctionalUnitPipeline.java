@@ -7,6 +7,7 @@ import io.darkcraft.procsim.model.helper.Pair;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
 import io.darkcraft.procsim.model.instruction.instructions.Add;
+import io.darkcraft.procsim.model.instruction.instructions.Mul;
 import io.darkcraft.procsim.model.instruction.instructions.Sub;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
 
@@ -31,11 +32,13 @@ public class ThreeFunctionalUnitPipeline extends FiveStepPipeline
 		IInstruction toMove = pipeline.get(from).a;
 		if(to == exStage)
 		{
-			if(toMove instanceof Add || toMove instanceof Sub)
+			if((toMove instanceof Add) || (toMove instanceof Sub))
 				to = 3;
+			if(toMove instanceof Mul)
+				to = 5;
 		}
 		int block = MiscFunctions.in(getExeBlocks(), to);
-		if(block != -1 && MiscFunctions.in(getExeBlocks(), from) == -1)
+		if((block != -1) && (MiscFunctions.in(getExeBlocks(), from) == -1))
 		{
 			int[] bl = getExeBlocks()[block];
 			for(int i : bl)
@@ -64,7 +67,7 @@ public class ThreeFunctionalUnitPipeline extends FiveStepPipeline
 
 	private void execute(int i, AbstractSimulator sim)
 	{
-		if(i == 2 || i == 4 || i == 7)
+		if((i == 2) || (i == 4) || (i == 7))
 		{
 			exStage = i;
 			super.execute(sim);
@@ -93,7 +96,7 @@ public class ThreeFunctionalUnitPipeline extends FiveStepPipeline
 	@Override
 	public boolean isFirstExeStage(int stage)
 	{
-		return stage == 2 || stage == 3 || stage == 5;
+		return (stage == 2) || (stage == 3) || (stage == 5);
 	}
 
 	private static int[][] exeBlocks = new int[][]{new int[]{7,6,5},new int[]{4,3}, new int[]{2}};

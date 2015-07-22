@@ -105,8 +105,8 @@ public class MainUI implements ActionListener
 				writer.println("MSF:" + memorySelectField.getText());
 			if (currentMemory != null)
 				writer.println("MEM:" + MemoryType.getString(currentMemory));
-			writer.println("PLT:" + pipelineTypeBox.getSelectedItem().toString());
 			writer.println("SIM:" + simulatorTypeBox.getSelectedItem().toString());
+			writer.println("PLT:" + pipelineTypeBox.getSelectedItem().toString());
 			writer.println("REG:" + registerTypeBox.getSelectedItem().toString());
 			writer.println("NPL:" + numPipelines.getText());
 			writer.println("FPC:" + fetchPerCycle.getText());
@@ -374,12 +374,20 @@ public class MainUI implements ActionListener
 		boolean init = inited;
 		if(init)
 			inited = false;
+		PipelineType current = null;
+		if(init)
+			current = (PipelineType) pipelineTypeBox.getSelectedItem();
 		SimulatorType type = (SimulatorType) simulatorTypeBox.getSelectedItem();
 		PipelineType[] appropriatePipelineTypes = PipelineType.getValues(type.ooo);
 		pipelineTypeBox.removeAllItems();
+		boolean found = false;
+		if(current != null)
+			for(PipelineType pt : appropriatePipelineTypes)
+				if(pt.equals(current))
+					found = true;
+		if(!found) current = null;
 		for(PipelineType pt : appropriatePipelineTypes)
 			pipelineTypeBox.addItem(pt);
-		pipelineTypeBox.setSelectedIndex(0);
 		if(init)
 		{
 			fetchPerCycle.setVisible(type.ooo);
@@ -389,6 +397,10 @@ public class MainUI implements ActionListener
 			mainFrame.pack();
 			inited = true;
 		}
+		if(current == null)
+			pipelineTypeBox.setSelectedIndex(0);
+		else
+			pipelineTypeBox.setSelectedItem(current);
 		save();
 	}
 

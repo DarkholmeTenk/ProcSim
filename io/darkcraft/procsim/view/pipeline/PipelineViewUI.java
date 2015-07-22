@@ -7,6 +7,7 @@ import io.darkcraft.procsim.controller.OutputController;
 import io.darkcraft.procsim.model.dependencies.IDependency;
 import io.darkcraft.procsim.model.helper.KeyboardListener;
 import io.darkcraft.procsim.model.helper.MapList;
+import io.darkcraft.procsim.model.helper.MiscFunctions;
 import io.darkcraft.procsim.model.instruction.IInstruction;
 import io.darkcraft.procsim.model.instruction.IMemoryInstruction;
 import io.darkcraft.procsim.model.simulator.AbstractSimulator;
@@ -56,6 +57,8 @@ public class PipelineViewUI implements ActionListener
 	private String[][]							stageNames;
 	private Set<Integer>						duplicateStages;
 	private int depType = 2;
+	private int[][] exeBlocks;
+	private int exeWidth;
 
 	public PipelineViewUI(AbstractSimulator _sim)
 	{
@@ -66,6 +69,8 @@ public class PipelineViewUI implements ActionListener
 		maxTime = pipelineData.size() - 1;
 		duplicateStages = DataHelper.getDuplicateStates(pipelineData);
 		deps = DependencyGraphBuilder.getToDependencies(sim.getInstructions());
+		exeBlocks = sim.getExeBlocks();
+		exeWidth = exeBlocks.length;
 
 		frame = new JFrame();
 		frame.setLayout(GridBagHelper.getLayout());
@@ -103,12 +108,28 @@ public class PipelineViewUI implements ActionListener
 			labels[i] = new JLabel[stageNames[i].length];
 			for (int j = 0; j < stageNames[i].length; j++)
 			{
+				if(MiscFunctions.in(exeBlocks, j) != -1) continue;
 				JLabel header = LabelHelper.get(stageNames[i][j]);
 				header.setHorizontalAlignment(SwingConstants.CENTER);
-				slotPanel.add(header, GridBagHelper.setWeights(1, 0, GridBagHelper.getConstraints(i, j * 2)));
+				int xPos = (i * exeWidth) + (exeWidth/2);
+				slotPanel.add(header, GridBagHelper.setWeights(1, 0, GridBagHelper.getConstraints(xPos, j * 2)));
 				JLabel data = LabelHelper.getPlain("",labelSize,true);
 				labels[i][j] = data;
-				slotPanel.add(data, GridBagHelper.getConstraints(i, (j * 2) + 1));
+				slotPanel.add(data, GridBagHelper.getConstraints(xPos, (j * 2) + 1));
+			}
+			int block = 0;
+			int yPos = MiscFunctions.min(exeBlocks);
+			for(int[] exeBlock : exeBlocks)
+			{
+				int lastStage = exeBlock[0];
+				JLabel header = LabelHelper.get(stageNames[i][lastStage]);
+				header.setHorizontalAlignment(SwingConstants.CENTER);
+				int xPos = (i * exeWidth) + (block++);
+				slotPanel.add(header, GridBagHelper.setWeights(1, 0, GridBagHelper.getConstraints(xPos, yPos * 2)));
+				JLabel data = LabelHelper.getPlain("",labelSize,true);
+				for(int stage : exeBlock)
+					labels[i][stage] = data;
+				slotPanel.add(data, GridBagHelper.getConstraints(xPos, (yPos * 2) + 1));
 			}
 		}
 		surface = new DrawingSurface();
@@ -157,6 +178,9 @@ public class PipelineViewUI implements ActionListener
 			timeLabel.setText("Cycle: " + time + " (skipped " + stagesSkipped + ")");
 		map = new HashMap<IInstruction,Integer>();
 		mapTwo = new HashMap<IInstruction,Integer>();
+		for (JLabel[] ls : labels)
+			for(JLabel l :ls)
+				l.setText("");
 		for (int i = 0; i < labels.length; i++)
 		{
 			for (int j = 0; j < labels[i].length; j++)
@@ -164,8 +188,6 @@ public class PipelineViewUI implements ActionListener
 				JLabel label = labels[i][j];
 				if (instructions[i][j] != null)
 					label.setText(instructions[i][j].toString());
-				else
-					label.setText("");
 				if ((prev == null) || (prev[i][j] != instructions[i][j]) || (prev[i][j] == null))
 				{
 					if((j > sim.getLastIDStage(i)) && (instructions[i][j] != null) && instructions[i][j].didFail())

@@ -22,7 +22,7 @@ public class OneFunctionalUnitOOOPipeline extends FiveStepPipeline
 		wbStage = 2;
 	}
 
-	private boolean clearToAdd(IInstruction id)
+	protected boolean clearToAdd(IInstruction id)
 	{
 		String[] inputRegisters = id.getInputRegisters();
 		int[] vals = new int[inputRegisters == null ? 0 : inputRegisters.length];

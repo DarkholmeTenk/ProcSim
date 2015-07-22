@@ -254,4 +254,9 @@ public abstract class AbstractSimulator
 	}
 
 	public void setOOOData(int fetchesPerCycle, int windowSize){};
+
+	public int[][] getExeBlocks()
+	{
+		return pipeline[0].getExeBlocks();
+	}
 }

@@ -5,6 +5,7 @@ import io.darkcraft.procsim.model.components.abstracts.IMemory;
 import io.darkcraft.procsim.model.components.abstracts.IRegisterBank;
 import io.darkcraft.procsim.model.components.pipelines.FiveStepPipeline;
 import io.darkcraft.procsim.model.components.pipelines.OneFunctionalUnitOOOPipeline;
+import io.darkcraft.procsim.model.components.pipelines.ThreeFunctionalUnitOOOPipeline;
 import io.darkcraft.procsim.model.components.pipelines.ThreeFunctionalUnitPipeline;
 import io.darkcraft.procsim.model.instruction.InstructionReader;
 
@@ -14,7 +15,8 @@ public enum PipelineType
 {
 	FIVESTEP("Five Step - 1 FU"),
 	FIVESTEP3("Five Step - 3 FU"),
-	OOOONEFU("1 FU", true);
+	OOOONEFU("1 FU", true),
+	OOOTHRFU("3 FU", true);
 
 	public final String name;
 	public final boolean ooo;
@@ -41,6 +43,7 @@ public enum PipelineType
 		case FIVESTEP: return new FiveStepPipeline(memory, registers, reader);
 		case FIVESTEP3: return new ThreeFunctionalUnitPipeline(memory, registers, reader);
 		case OOOONEFU: return new OneFunctionalUnitOOOPipeline(memory, registers, reader);
+		case OOOTHRFU: return new ThreeFunctionalUnitOOOPipeline(memory, registers, reader);
 		default: return null;
 		}
 	}
