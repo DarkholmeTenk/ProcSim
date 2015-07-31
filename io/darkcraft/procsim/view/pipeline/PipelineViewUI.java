@@ -137,14 +137,16 @@ public class PipelineViewUI implements ActionListener
 		layered.setLayer(slotPanel, 0, 0);
 		layered.add(surface, GridBagHelper.getConstraints(0, 0));
 		layered.add(slotPanel, GridBagHelper.getConstraints(0, 0));
-		frame.add(layered, GridBagHelper.setWeights(1, GridBagHelper.getConstraints(0, 2, 5, 1)));
+		frame.add(layered, GridBagHelper.setWeights(1, GridBagHelper.getConstraints(0, 2, 5, 2)));
 		memoryPanel = new JPanel();
 		memoryPanel.setLayout(GridBagHelper.getLayout());
-		frame.add(memoryPanel, GridBagHelper.getConstraints(6, 2));
+		frame.add(memoryPanel, GridBagHelper.getConstraints(6, 2, 1, 2));
 		if(sim.hasInstructionWindow())
 		{
 			iwPanel = new InstructionWindowPanel(sim);
-			frame.add(iwPanel, GridBagHelper.getConstraints(7,2));
+			frame.add(iwPanel, GridBagHelper.getConstraints(7,2,1,1, GridBagConstraints.NORTH));
+			JLabel temp = LabelHelper.get("");
+			frame.add(temp, GridBagHelper.setWeights(1, GridBagHelper.getConstraints(7, 3)));
 		}
 		update();
 	}

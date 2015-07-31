@@ -18,6 +18,7 @@ public class InstructionWindowPanel extends JPanel
 	{
 		sim = _sim;
 		setLayout(GridBagHelper.getLayout());
+		add(LabelHelper.get(""), GridBagHelper.setWeights(1, GridBagHelper.getConstraints(0,1000)));
 	}
 
 	public void update(int stage)

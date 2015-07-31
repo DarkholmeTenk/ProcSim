@@ -51,6 +51,7 @@ public class OutputUI implements ActionListener
 	public OutputController		controller;
 
 	private static final Color	bg					= Color.WHITE;
+	public boolean ran = false;
 
 	public OutputUI(AbstractSimulator _sim)
 	{
@@ -90,9 +91,6 @@ public class OutputUI implements ActionListener
 		sim = _sim;
 		runSim();
 		controller.addText("Instructions", 0, 0);
-		controller.fillInstructions();
-		controller.fillResults(stateNum = maxStateNum = controller.getMaxStateNum());
-		controller.addArrowsToSurface();
 		mainContainer.add(instructionPane);
 		mainFrame.pack();
 		instructionPane.setMinimumSize(new Dimension(instructionPane.getWidth() + 5, 1));
@@ -139,11 +137,17 @@ public class OutputUI implements ActionListener
 	private void runSim()
 	{
 		int timer = 0;
-		while (sim.step())
+		while (sim.step() && !ran)
 		{
 			if (timer++ > 10000)
 				break;
 		}
+		if(timer <= 10000)
+			ran = true;
+		controller.clearData();
+		controller.fillInstructions();
+		controller.fillResults(stateNum = maxStateNum = controller.getMaxStateNum());
+		controller.addArrowsToSurface();
 	}
 
 	public static Dimension		preferredSize		= null;
@@ -167,6 +171,8 @@ public class OutputUI implements ActionListener
 			surface.setVisible(false);
 			int toChange = source == stateLeftButton ? -1 : 1;
 			toChange *= KeyboardListener.getMultiplier(maxStateNum);
+			if((source == stateRightButton) && ((stateNum + toChange) > maxStateNum))
+				runSim();
 			stateNum = Math.min(maxStateNum, Math.max(1, stateNum + toChange));
 			dataPanel.removeAll();
 			controller.clear();

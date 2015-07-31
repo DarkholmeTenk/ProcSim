@@ -44,6 +44,13 @@ public class OutputController
 		simulator = sim;
 	}
 
+	public void clearData()
+	{
+		fillData = null;
+		insts = null;
+		links = new MapList();
+	}
+
 	public void fillInstructions()
 	{
 		if (fillData == null)
@@ -52,7 +59,7 @@ public class OutputController
 		{
 			List<Pair<IInstruction, String>> row = fillData.get(i);
 			Pair<IInstruction, String> pair = row.get(0);
-			if (pair == null || pair.b == null || pair.b.isEmpty())
+			if ((pair == null) || (pair.b == null) || pair.b.isEmpty())
 				continue;
 			addText(pair.b, i, 0);
 		}
@@ -81,7 +88,7 @@ public class OutputController
 			label.setForeground(failedColor);
 		if (stalled)
 			label.setForeground(stalledColor);
-		if (i % 2 == 0)
+		if ((i % 2) == 0)
 			label.setBackground(bgColor1);
 		else
 			label.setBackground(bgColor2);
@@ -96,7 +103,7 @@ public class OutputController
 					String temp = data[x];
 					label = new JLabel(temp);
 					label.setForeground(fg);
-					if (i % 2 == 0)
+					if ((i % 2) == 0)
 						label.setBackground(bgColor1);
 					else
 						label.setBackground(bgColor2);
@@ -129,19 +136,20 @@ public class OutputController
 		if (fillData == null)
 			fillData = OutputHelper.outputData(simulator);
 		int lowestY = 0;
+		toFill.dataPanel.removeAll();
 		for (int i = 0; i < fillData.size(); i++)
 		{
 			List<Pair<IInstruction, String>> row = fillData.get(i);
-			for (int j = 1; j < row.size() && j <= upTo; j++)
+			for (int j = 1; (j < row.size()) && (j <= upTo); j++)
 			{
 				if (i == 0)
 				{
 					JLabel gap = new JLabel(" ");
 					gap.setPreferredSize(OutputUI.gapSize);
-					toFill.dataPanel.add(gap, GridBagHelper.getConstraints(2 * j + 1, 0));
+					toFill.dataPanel.add(gap, GridBagHelper.getConstraints((2 * j) + 1, 0));
 				}
 				Pair<IInstruction, String> pair = row.get(j);
-				if (pair == null || pair.b == null || pair.b.isEmpty())
+				if ((pair == null) || (pair.b == null) || pair.b.isEmpty())
 					continue;
 				String str = pair.b;
 				addText(str, i, j);
@@ -155,12 +163,12 @@ public class OutputController
 		}
 		JLabel gap = new JLabel(" ");
 		gap.setPreferredSize(OutputUI.gapSize);
-		toFill.dataPanel.add(gap, GridBagHelper.setWeights(1, 0, GridBagHelper.getConstraints(2 * upTo + 1, 0)));
-		if (upTo < fillData.get(0).size() - 1)
+		toFill.dataPanel.add(gap, GridBagHelper.setWeights(1, 0, GridBagHelper.getConstraints((2 * upTo) + 1, 0)));
+		if (upTo < (fillData.get(0).size() - 1))
 		{
 			JLabel l = new JLabel("");
 			l.setPreferredSize(minimal);
-			toFill.dataPanel.add(l, GridBagHelper.setWeights(0, 1, GridBagHelper.getConstraints(2 * upTo + 1, lowestY + 1)));
+			toFill.dataPanel.add(l, GridBagHelper.setWeights(0, 1, GridBagHelper.getConstraints((2 * upTo) + 1, lowestY + 1)));
 		}
 	}
 
@@ -189,9 +197,9 @@ public class OutputController
 				{
 					Pair<IInstruction, String> pair1 = row.get(x);
 					Pair<IInstruction, String> pair2 = tempRow.get(x);
-					if ((pair1 != null && !isStalled(pair1.b)) && x != j)
+					if (((pair1 != null) && !isStalled(pair1.b)) && (x != j))
 						continue depLoop;
-					if (pair2 != null && pair2.b != null && !pair2.b.isEmpty())
+					if ((pair2 != null) && (pair2.b != null) && !pair2.b.isEmpty())
 					{
 						if (x == j)
 							continue depLoop;
@@ -222,10 +230,10 @@ public class OutputController
 				for (ArrowDataStore arrow : arrows)
 				{
 					double yO = (count++ / (double) (arrows.size() + 1)) * OutputUI.preferredSize.getHeight();
-					double x1 = arrow.startX * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth()) - OutputUI.gapSize.getWidth() - 7;
-					double y1 = (arrow.startY + 1) * (OutputUI.preferredSize.getHeight() + 4) - 8;
-					double x2 = (arrow.endX - 1) * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth()) + 3;
-					double y2 = arrow.endY * (OutputUI.preferredSize.getHeight() + 4) + 3 + yO;
+					double x1 = (arrow.startX * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth())) - OutputUI.gapSize.getWidth() - 7;
+					double y1 = ((arrow.startY + 1) * (OutputUI.preferredSize.getHeight() + 4)) - 8;
+					double x2 = ((arrow.endX - 1) * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth())) + 3;
+					double y2 = (arrow.endY * (OutputUI.preferredSize.getHeight() + 4)) + 3 + yO;
 					String depReg = arrow.dep.getDependentRegister();
 					Color c = ColourStore.getColor(depReg);
 					color(depReg, c);
@@ -264,10 +272,10 @@ public class OutputController
 						eX = sX = toFill.stateNum;
 					}
 					double yO = (count++ / (double) (arrows.size() + 1)) * OutputUI.preferredSize.getHeight();
-					double x1 = sX * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth()) - OutputUI.gapSize.getWidth() - 7;
-					double y1 = (sY + 1) * (OutputUI.preferredSize.getHeight() + 4) - 8;
-					double x2 = (eX - 1) * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth()) + 3;
-					double y2 = eY * (OutputUI.preferredSize.getHeight() + 4) + 3 + yO;
+					double x1 = (sX * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth())) - OutputUI.gapSize.getWidth() - 7;
+					double y1 = ((sY + 1) * (OutputUI.preferredSize.getHeight() + 4)) - 8;
+					double x2 = ((eX - 1) * (OutputUI.preferredSize.getWidth() + 8 + OutputUI.gapSize.getWidth())) + 3;
+					double y2 = (eY * (OutputUI.preferredSize.getHeight() + 4)) + 3 + yO;
 					String depReg = arrow.dep.getDependentRegister();
 					Color c = ColourStore.getColor(depReg);
 					color(depReg, c);
